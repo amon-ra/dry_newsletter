@@ -21,33 +21,17 @@ from dry_newsletter.newsletter.settings import DEFAULT_HEADER_REPLY
 from dry_newsletter.newsletter.settings import DEFAULT_HEADER_SENDER
 from dry_newsletter.newsletter.utils.vcard import vcard_contact_export
 
-# Patch for Python < 2.6
-try:
-    getattr(SMTP, 'ehlo_or_helo_if_needed')
-except AttributeError:
-    def ehlo_or_helo_if_needed(self):
-        if self.helo_resp is None and self.ehlo_resp is None:
-            if not (200 <= self.ehlo()[0] <= 299):
-                (code, resp) = self.helo()
-                if not (200 <= code <= 299):
-                    raise SMTPHeloError(code, resp)
-    SMTP.ehlo_or_helo_if_needed = ehlo_or_helo_if_needed
-
 
 class SMTPServer(models.Model):
     """Configuration of a SMTP server"""
     name = models.CharField(_('name'), max_length=255)
     host = models.CharField(_('server host'), max_length=255)
-    user = models.CharField(_('server user'), max_length=128, blank=True,
-                            help_text=_('Leave it empty if the host is public.'))
-    password = models.CharField(_('server password'), max_length=128, blank=True,
-                                help_text=_('Leave it empty if the host is public.'))
+    user = models.CharField(_('server user'), max_length=128, blank=True, help_text=_('Leave it empty if the host is public.'))
+    password = models.CharField(_('server password'), max_length=128, blank=True, help_text=_('Leave it empty if the host is public.'))
     port = models.IntegerField(_('server port'), default=25)
     tls = models.BooleanField(_('server use TLS'))
 
-    headers = models.TextField(_('custom headers'), blank=True,
-                               help_text=_('key1: value1 key2: value2, splitted by return line.\n'\
-                                           'Useful for passing some tracking headers if your provider allows it.'))
+    headers = models.TextField(_('custom headers'), blank=True, help_text=_('key1: value1 key2: value2, splitted by return line.\n Useful for passing some tracking headers if your provider allows it.'))
     mails_hour = models.IntegerField(_('mails per hour'), default=0)
 
     def connect(self):
@@ -103,6 +87,49 @@ class SMTPServer(models.Model):
     class Meta:
         verbose_name = _('SMTP server')
         verbose_name_plural = _('SMTP servers')
+
+class MailingListGroup(models.Model):
+    title = models.CharField(_('title'), max_length=255)
+
+    class Meta:
+        ordering = ('title',)
+        verbose_name_plural = _('category groups')
+
+class MailingList(models.Model):
+    """Mailing list"""
+    name = models.CharField(_('name'), max_length=255)
+    description = models.TextField(_('description'), blank=True)
+    mailing_list_group = models.ForeignKey(MailingListGroup, verbose_name=_('category group'), blank=True, null=True)
+
+    subscribers = models.ManyToManyField(Contact, verbose_name=_('subscribers'),
+                                         related_name='mailinglist_subscriber')
+    unsubscribers = models.ManyToManyField(Contact, verbose_name=_('unsubscribers'),
+                                           related_name='mailinglist_unsubscriber',
+                                           null=True, blank=True)
+
+    creation_date = models.DateTimeField(_('creation date'), auto_now_add=True)
+    modification_date = models.DateTimeField(_('modification date'), auto_now=True)
+
+    def subscribers_count(self):
+        return self.subscribers.all().count()
+    subscribers_count.short_description = _('subscribers')
+
+    def unsubscribers_count(self):
+        return self.unsubscribers.all().count()
+    unsubscribers_count.short_description = _('unsubscribers')
+
+    def expedition_set(self):
+        unsubscribers_id = self.unsubscribers.values_list('id', flat=True)
+        return self.subscribers.valid_subscribers().exclude(
+            id__in=unsubscribers_id)
+
+    def __unicode__(self):
+        return self.name
+
+    class Meta:
+        ordering = ('-creation_date',)
+        verbose_name = _('mailing list')
+        verbose_name_plural = _('mailing lists')
 
 
 class Contact(models.Model):
@@ -162,40 +189,7 @@ class Contact(models.Model):
         verbose_name_plural = _('contacts')
 
 
-class MailingList(models.Model):
-    """Mailing list"""
-    name = models.CharField(_('name'), max_length=255)
-    description = models.TextField(_('description'), blank=True)
 
-    subscribers = models.ManyToManyField(Contact, verbose_name=_('subscribers'),
-                                         related_name='mailinglist_subscriber')
-    unsubscribers = models.ManyToManyField(Contact, verbose_name=_('unsubscribers'),
-                                           related_name='mailinglist_unsubscriber',
-                                           null=True, blank=True)
-
-    creation_date = models.DateTimeField(_('creation date'), auto_now_add=True)
-    modification_date = models.DateTimeField(_('modification date'), auto_now=True)
-
-    def subscribers_count(self):
-        return self.subscribers.all().count()
-    subscribers_count.short_description = _('subscribers')
-
-    def unsubscribers_count(self):
-        return self.unsubscribers.all().count()
-    unsubscribers_count.short_description = _('unsubscribers')
-
-    def expedition_set(self):
-        unsubscribers_id = self.unsubscribers.values_list('id', flat=True)
-        return self.subscribers.valid_subscribers().exclude(
-            id__in=unsubscribers_id)
-
-    def __unicode__(self):
-        return self.name
-
-    class Meta:
-        ordering = ('-creation_date',)
-        verbose_name = _('mailing list')
-        verbose_name_plural = _('mailing lists')
 
 
 class Newsletter(models.Model):
@@ -213,28 +207,34 @@ class Newsletter(models.Model):
                       (CANCELED, _('canceled')),
                       )
 
-    title = models.CharField(_('title'), max_length=255,
-                             help_text=_('You can use the "{{ UNIQUE_KEY }}" variable ' \
-                                         'for unique identifier within the newsletter\'s title.'))
-    content = models.TextField(_('content'), help_text=_('Or paste an URL.'),
-                               default=_('<body>\n<!-- Edit your newsletter here -->\n</body>'))
+    title = models.CharField(_('title'), max_length=255, help_text=_('You can use the "{{ UNIQUE_KEY }}" variable for unique identifier within the newsletter\'s title.'))
+    content = models.TextField(_('content'), help_text=_('Or paste an URL.'), default=_('<body>\n<!-- Edit your newsletter here -->\n</body>'))
 
-    mailing_list = models.ForeignKey(MailingList, verbose_name=_('mailing list'))
-    test_contacts = models.ManyToManyField(Contact, verbose_name=_('test contacts'),
-                                           blank=True, null=True)
+    article_1_title = models.CharField(_('Article 1 - Title'), max_length=255, blank=True)
+    article_1_subtitle = models.CharField(_('Article 1 - Subtitle'), max_length=255, blank=True)
+    article_1_text = models.TextField(_('Article 1 - Text'), help_text=_(use_html_to_text_converter), default=_('<body>\n<!-- Edit your newsletter here -->\n</body>'), blank=True)
+    # DA RISOLVERE Alberto: se carico immagine con spazio nel nome, nella mail lo spazio viene escaped con + e quindi non scarica immagine
+    article_1_image = models.ImageField(_('Article 1 - Image'), upload_to=upload_to, help_text=help_text_image, blank=True)
 
-    server = models.ForeignKey(SMTPServer, verbose_name=_('smtp server'),
-                               default=1)
-    header_sender = models.CharField(_('sender'), max_length=255,
-                                     default=DEFAULT_HEADER_SENDER)
-    header_reply = models.CharField(_('reply to'), max_length=255,
-                                    default=DEFAULT_HEADER_REPLY)
+    article_2_title = models.CharField(_('Article 2 - Title'), max_length=255, blank=True)
+    article_2_subtitle = models.CharField(_('Article 2 - Subtitle'), max_length=255, blank=True)
+    article_2_text = models.TextField(_('Article 2 - Text'), help_text=_(use_html_to_text_converter), default=_('<body>\n<!-- Edit your newsletter here -->\n</body>'), blank=True)
+    article_2_image = models.ImageField(_('Article 2 - Image'), upload_to=upload_to, help_text=help_text_image, blank=True)
+       
+    article_3_title = models.CharField(_('Article 3 - Title'), max_length=255, blank=True)
+    article_3_subtitle = models.CharField(_('Article 3 - Subtitle'), max_length=255, blank=True)
+    article_3_text = models.TextField(_('Article 3 - Text'), help_text=_(use_html_to_text_converter), default=_('<body>\n<!-- Edit your newsletter here -->\n</body>'), blank=True)
+    article_3_image = models.ImageField(_('Article 3 - Image'), upload_to=upload_to, help_text=help_text_image, blank=True)
 
+    mailinglists = models.ManyToManyField(Category, verbose_name=_('mailing list'), related_name=('newsletters'),)
+    test_contacts = models.ManyToManyField(Contact, verbose_name=_('test contacts'), blank=True, null=True)
+
+    server = models.ForeignKey(SMTPServer, verbose_name=_('smtp server'), default=1)
+    header_sender = models.CharField(_('sender'), max_length=255, default=DEFAULT_HEADER_SENDER)
+    header_reply = models.CharField(_('reply to'), max_length=255, default=DEFAULT_HEADER_REPLY)
     status = models.IntegerField(_('status'), choices=STATUS_CHOICES, default=DRAFT)
     sending_date = models.DateTimeField(_('sending date'), default=datetime.now)
-
-    slug = models.SlugField(help_text=_('Used for displaying the newsletter on the site.'),
-                            unique=True)
+    slug = models.SlugField(help_text=_('Used for displaying the newsletter on the site.'), unique=True)
     creation_date = models.DateTimeField(_('creation date'), auto_now_add=True)
     modification_date = models.DateTimeField(_('modification date'), auto_now=True)
 
@@ -245,14 +245,6 @@ class Newsletter(models.Model):
     def get_absolute_url(self):
         return ('newsletter_newsletter_preview', (self.slug,))
 
-    @models.permalink
-    def get_historic_url(self):
-        return ('newsletter_newsletter_historic', (self.slug,))
-
-    @models.permalink
-    def get_statistics_url(self):
-        return ('newsletter_newsletter_statistics', (self.slug,))
-
     def __unicode__(self):
         return self.title
 
@@ -261,48 +253,6 @@ class Newsletter(models.Model):
         verbose_name = _('newsletter')
         verbose_name_plural = _('newsletters')
         permissions = (('can_change_status', 'Can change status'),)
-
-
-class Link(models.Model):
-    """Link sended in a newsletter"""
-    title = models.CharField(_('title'), max_length=255)
-    url = models.CharField(_('url'), max_length=255)
-
-    creation_date = models.DateTimeField(_('creation date'), auto_now_add=True)
-
-    def get_absolute_url(self):
-        return self.url
-
-    def __unicode__(self):
-        return self.title
-
-    class Meta:
-        ordering = ('-creation_date',)
-        verbose_name = _('link')
-        verbose_name_plural = _('links')
-
-
-class Attachment(models.Model):
-    """Attachment file in a newsletter"""
-
-    def get_newsletter_storage_path(self, filename):
-        filename = force_unicode(filename)
-        return '/'.join([BASE_PATH, self.newsletter.slug, filename])
-
-    newsletter = models.ForeignKey(Newsletter, verbose_name=_('newsletter'))
-    title = models.CharField(_('title'), max_length=255)
-    file_attachment = models.FileField(_('file to attach'), max_length=255,
-                                       upload_to=get_newsletter_storage_path)
-
-    class Meta:
-        verbose_name = _('attachment')
-        verbose_name_plural = _('attachments')
-
-    def __unicode__(self):
-        return self.title
-
-    def get_absolute_url(self):
-        return self.file_attachment.url
 
 
 class ContactMailingStatus(models.Model):
@@ -329,8 +279,6 @@ class ContactMailingStatus(models.Model):
     newsletter = models.ForeignKey(Newsletter, verbose_name=_('newsletter'))
     contact = models.ForeignKey(Contact, verbose_name=_('contact'))
     status = models.IntegerField(_('status'), choices=STATUS_CHOICES)
-    link = models.ForeignKey(Link, verbose_name=_('link'),
-                             blank=True, null=True)
 
     creation_date = models.DateTimeField(_('creation date'), auto_now_add=True)
 
@@ -343,23 +291,3 @@ class ContactMailingStatus(models.Model):
         ordering = ('-creation_date',)
         verbose_name = _('contact mailing status')
         verbose_name_plural = _('contact mailing statuses')
-
-
-class WorkGroup(models.Model):
-    """Work Group for privatization of the ressources"""
-    name = models.CharField(_('name'), max_length=255)
-    group = models.ForeignKey(Group, verbose_name=_('permissions group'))
-
-    contacts = models.ManyToManyField(Contact, verbose_name=_('contacts'),
-                                      blank=True, null=True)
-    mailinglists = models.ManyToManyField(MailingList, verbose_name=_('mailing lists'),
-                                          blank=True, null=True)
-    newsletters = models.ManyToManyField(Newsletter, verbose_name=_('newsletters'),
-                                         blank=True, null=True)
-
-    def __unicode__(self):
-        return self.name
-
-    class Meta:
-        verbose_name = _('workgroup')
-        verbose_name_plural = _('workgroups')
