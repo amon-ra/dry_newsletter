@@ -126,7 +126,7 @@ class NewsLetterSender(object):
                            'newsletter': self.newsletter,
                            'tracking_image_format': TRACKING_IMAGE_FORMAT,
                            'uidb36': uidb36, 'token': token,
-                            'MEDIA_URL': settings.MEDIA_URL })})
+                           'MEDIA_URL': settings.MEDIA_URL })})
         content = self.newsletter_template.render(context)
         if TRACKING_LINKS:
             content = track_links(content, context)
@@ -136,9 +136,6 @@ class NewsLetterSender(object):
         if INCLUDE_UNSUBSCRIPTION:
             unsubscription = render_to_string('newsletter/newsletter_link_unsubscribe.html', context)
             content = body_insertion(content, unsubscription, end=True)
-        if TRACKING_IMAGE:
-            image_tracking = render_to_string('newsletter/newsletter_image_tracking.html', context)
-            content = body_insertion(content, image_tracking, end=True)
         return smart_unicode(content)
 
     def update_newsletter_status(self):
@@ -212,8 +209,6 @@ class Mailer(NewsLetterSender):
         if not self.smtp:
             self.smtp_connect()
 
-        self.attachments = self.build_attachments()
-
         expedition_list = self.expedition_list
 
         number_of_recipients = len(expedition_list)
@@ -223,14 +218,11 @@ class Mailer(NewsLetterSender):
         i = 1
         for contact in expedition_list:
             if self.verbose:
-                print '- Processing %s/%s (%s)' % (
-                    i, number_of_recipients, contact.pk)
+                print '- Processing %s/%s (%s)' % (i, number_of_recipients, contact.pk)
 
             try:
                 message = self.build_message(contact)
-                self.smtp.sendmail(smart_str(self.newsletter.header_sender),
-                                   contact.email,
-                                   message.as_string())
+                self.smtp.sendmail(smart_str(self.newsletter.header_sender), contact.email, message.as_string())
             except Exception, e:
                 exception = e
             else:
