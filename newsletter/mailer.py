@@ -173,10 +173,13 @@ class NewsLetterSender(object):
         if self.test:
             return self.newsletter.test_contacts.all()
 
-        already_sent = ContactMailingStatus.objects.filter(status=ContactMailingStatus.SENT,
-                                                           newsletter=self.newsletter).values_list('contact__id', flat=True)
-        expedition_list = self.newsletter.mailing_list.expedition_set().exclude(id__in=already_sent)
-        return expedition_list
+        already_sent = ContactMailingStatus.objects.filter(status=ContactMailingStatus.SENT, newsletter=self.newsletter).values_list('contact__id', flat=True)
+
+        expedition_list = []
+        for ml in self.newsletter.mailing_lists.all()
+            contacts = ml.expedition_set().exclude(id__in=already_sent)
+            expedition_list.append(contacts)
+        return sorted(set(expedition_list))
 
     def update_contact_status(self, contact, exception):
         if exception is None:
