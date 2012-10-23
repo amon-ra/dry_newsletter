@@ -1,8 +1,129 @@
-<html>
-  <head>
-    <title>{% block title %}{{ title }}{% endblock %}</title>
-  </head>
-  {% block body %}
-    {{ content|safe }}
-  {% endblock %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>{{ newsletter.title }}</title>
+    <style type="text/css">
+             
+                        .ExternalClass {width:100%;} 
+                        .ExternalClass, .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div {
+                            line-height: 100%;} 
+                         
+                        body {-webkit-text-size-adjust:none; -ms-text-size-adjust:none;} 
+                        body {margin:0; padding:0;} 
+                        table td {border-collapse:collapse;}    
+                 
+                        p {margin:0; padding:0; margin-bottom:0;}       
+                         
+                        h1, h2, h3, h4, h5, h6 {
+                           color: black; 
+                           line-height: 100%; 
+                           }  
+                
+                        a, a:link {
+                           color:#2A5DB0;
+                           text-decoration: underline;
+                           }       
+ 
+                        body, #body_style {
+                           background:#000;
+                           min-height:1000px;
+
+                           font-family:Arial, Helvetica, sans-serif;
+                           font-size:12px;
+                           } 
+                            
+                        span.yshortcuts { color:#000; background-color:none; border:none;}
+                        span.yshortcuts:hover,
+                        span.yshortcuts:active,
+                        span.yshortcuts:focus {color:#000; background-color:none; border:none;}
+                     
+                        a:visited { color: #3c96e2; text-decoration: none} 
+                        a:focus   { color: #3c96e2; text-decoration: underline}  
+                        a:hover   { color: #3c96e2; text-decoration: underline}  
+ 
+                        @media only screen and (max-device-width: 480px) {
+ 
+                        }       
+                         
+                        @media only screen and (min-device-width: 768px) and (max-device-width: 1024px)  {          
+ 
+                        }              
+ 						
+ 						#logo {width:250px}
+       </style>   
+     
+</head>
+	<body>
+		
+
+		
+		
+		
+		
+		<div style="background-color:#c5d5da;text-align:center;font-size:100%">
+			<br>
+			<br>
+			<p>Se non visualizzi correttamente questa email <a href="http://{{ domain }}{% url dry_newsletter slug=newsletter.slug %}" target="_blank">clicca qui</a>.</p>
+			<br>
+			</a>
+			<br>
+			<br>
+			<span class="HOEnZb"><font color="#888888"> </font></span>
+			<table cellspacing="0" cellpadding="0" style="width:619px;margin:0 auto;text-align:left;background-color:white">
+				<tbody>
+					<tr>
+						<td><img id="logo" src="http://www.iperborea.com/static/website/logo_25_anni.png" editable="true" label="Logo Iperborea"></td>
+					</tr>
+					<tr>
+						<td style="font-family:Gill Sans,GillSans,Lucida Grande,Lucida Sans Unicode,Verdana,Arial,sans-serif;color:#6e8798;padding:0 20px;vertical-align:bottom">	
+							<p style="font-size:2em;padding-top:60px;padding-bottom:15px">
+								Newsletter {{ newsletter.sending_date|date:"D d M Y" }}
+							</p>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<p>{{ newsletter.content }}</p>			
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<div style="margin-left:1px;border-top:3px solid #d3dfe3;border-bottom:3px solid #d3dfe3;width:574px;padding:10px 20px">
+								<img src="{{ MEDIA_URL }}{{ newsletter.article_1_image}}" border="0" style="margin:15px;float:left" alt="" width="200" height="232">
+								<p>
+									<span style="color:#cc3300"><em><span style="font-size:x-large">{{ newsletter.article_1_title }}</span></em></span>
+									<br>
+									<span style="color:#cc3300"><em><span style="font-size:medium">{{ newsletter.article_1_subtitle }}</span></em></span>
+									<br>
+									<span>{{ newsletter.article_1_text|safe }}</span>
+									<br>
+								</p>
+							</div>
+						</td>
+					</tr>
+
+
+					<tr>
+						<td style="min-height:60px;color:#6e8798;padding:20px"><img style="margin-right:20px;float:left">
+						<div style="float:left;width:430px;font-size:10px">
+							<p>
+								<b>minimum fax s.r.l. </b>â€¢ p.le di ponte milvio, 28 â€¢ 00135 Roma
+								<br>
+								Se hai ricevuto questa newsletter per errore o se desideri cancellarti dalla nostra mailing list
+								invia una mail con oggetto "CANCELLAMI" a <a href="mailto:web@minimumfax.com?subject=CANCELLAMI" target="_blank">web@minimumfax.com</a>
+							</p><p></p><p></p>
+						</div></td>
+					</tr>
+					<tr>
+						<td><img></td>
+					</tr>
+				</tbody>
+			</table>
+			<div class="yj6qo ajU">
+				<div id=":w7" class="ajR" role="button" tabindex="0" aria-label="Show trimmed content" data-tooltip="Show trimmed content"><img class="ajT" src="images/cleardot.gif">
+				</div>
+			</div><span class="HOEnZb adL"><font color="#888888"> </font></span>
+		</div>
+	</body>
 </html>

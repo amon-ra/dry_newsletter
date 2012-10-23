@@ -90,11 +90,9 @@ class ContactAdmin(admin.ModelAdmin):
 
         context = {'title': _('Contact importation'),
                    'opts': opts,
-                   #'root_path': reverse('admin', current_app=opts.app_label),
                    'app_label': opts.app_label}
 
-        return render_to_response('newsletter/contact_import.html',
-                                  context, RequestContext(request))
+        return render_to_response('newsletter/contact_import.html', context, RequestContext(request))
 
     def filtered_request_queryset(self, request):
         """Return queryset filtered by the admin list view"""
@@ -111,13 +109,11 @@ class ContactAdmin(admin.ModelAdmin):
 
     def exportation_vcard(self, request):
         """Export filtered contacts in VCard"""
-        return self.export_vcard(request, self.filtered_request_queryset(request),
-                                 'contacts_edn_%s' % datetime.now().strftime('%d-%m-%Y'))
+        return self.export_vcard(request, self.filtered_request_queryset(request), 'contacts_edn_%s' % datetime.now().strftime('%d-%m-%Y'))
 
     def exportation_excel(self, request):
         """Export filtered contacts in Excel"""
-        return self.export_excel(request, self.filtered_request_queryset(request),
-                                 'contacts_edn_%s' % datetime.now().strftime('%d-%m-%Y'))
+        return self.export_excel(request, self.filtered_request_queryset(request), 'contacts_edn_%s' % datetime.now().strftime('%d-%m-%Y'))
 
     def get_urls(self):
         urls = super(ContactAdmin, self).get_urls()

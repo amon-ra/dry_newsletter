@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 
-from emencia.django.newsletter.models import SMTPServer
+from dry_newsletter.newsletter.models import SMTPServer
 
 
 class SMTPServerAdminForm(forms.ModelForm):
@@ -31,10 +31,8 @@ class SMTPServerAdmin(admin.ModelAdmin):
     list_filter = ('tls',)
     search_fields = ('name', 'host', 'user')
     fieldsets = ((None, {'fields': ('name', )}),
-                 (_('Configuration'), {'fields': ('host', 'port',
-                                                  'user', 'password', 'tls')}),
-                 (_('Miscellaneous'), {'fields': ('mails_hour', 'headers'),
-                                       'classes': ('collapse', )}),
+                 (_('Configuration'), {'fields': ('host', 'port', 'user', 'password', 'tls')}),
+                 (_('Miscellaneous'), {'fields': ('mails_hour', 'headers'), 'classes': ('collapse', )}),
                  )
     actions = ['check_connections']
     actions_on_top = False
