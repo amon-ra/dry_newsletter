@@ -26,6 +26,7 @@ except ImportError:  # Python 2.4 compatibility
     from email.MIMEImage import MIMEImage
 from email import message_from_file
 from html2text import html2text as html2text_orig
+from django.conf import settings
 from django.contrib.sites.models import Site
 from django.template import Context, Template
 from django.template.loader import render_to_string
@@ -106,51 +107,14 @@ class NewsLetterSender(object):
         message_alt.attach(MIMEText(smart_str(content_html), 'html', 'UTF-8'))
         message.attach(message_alt)
 
-        for attachment in self.attachments:
-            message.attach(attachment)
-
         for header, value in self.newsletter.server.custom_headers.items():
             message[header] = value
 
         return message
 
-    def build_attachments(self):
-        """Build email's attachment messages"""
-        attachments = []
-
-        for attachment in self.newsletter.attachment_set.all():
-            ctype, encoding = mimetypes.guess_type(attachment.file_attachment.path)
-
-            if ctype is None or encoding is not None:
-                ctype = 'application/octet-stream'
-
-            maintype, subtype = ctype.split('/', 1)
-
-            fd = open(attachment.file_attachment.path, 'rb')
-            if maintype == 'text':
-                message_attachment = MIMEText(fd.read(), _subtype=subtype)
-            elif maintype == 'message':
-                message_attachment = message_from_file(fd)
-            elif maintype == 'image':
-                message_attachment = MIMEImage(fd.read(), _subtype=subtype)
-            elif maintype == 'audio':
-                message_attachment = MIMEAudio(fd.read(), _subtype=subtype)
-            else:
-                message_attachment = MIMEBase(maintype, subtype)
-                message_attachment.set_payload(fd.read())
-                encode_base64(message_attachment)
-            fd.close()
-            message_attachment.add_header('Content-Disposition', 'attachment',
-                                          filename=attachment.title)
-            attachments.append(message_attachment)
-
-        return attachments
-
     def build_title_content(self, contact):
         """Generate the email title for a contact"""
-        context = Context({'contact': contact,
-                           'UNIQUE_KEY': ''.join(sample(UNIQUE_KEY_CHAR_SET,
-                                                        UNIQUE_KEY_LENGTH))})
+        context = Context({'contact': contact, 'UNIQUE_KEY': ''.join(sample(UNIQUE_KEY_CHAR_SET, UNIQUE_KEY_LENGTH))})
         title = self.title_template.render(context)
         return title
 
@@ -161,7 +125,8 @@ class NewsLetterSender(object):
                            'domain': Site.objects.get_current().domain,
                            'newsletter': self.newsletter,
                            'tracking_image_format': TRACKING_IMAGE_FORMAT,
-                           'uidb36': uidb36, 'token': token})
+                           'uidb36': uidb36, 'token': token,
+                            'MEDIA_URL': settings.MEDIA_URL })})
         content = self.newsletter_template.render(context)
         if TRACKING_LINKS:
             content = track_links(content, context)
