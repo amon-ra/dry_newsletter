@@ -177,8 +177,7 @@ class MailingList(models.Model):
 
     def expedition_set(self):
         unsubscribers_id = self.unsubscribers.values_list('id', flat=True)
-        return self.subscribers.valid_subscribers().exclude(
-            id__in=unsubscribers_id)
+        return self.subscribers.valid_subscribers().exclude(id__in=unsubscribers_id)
 
     def __unicode__(self):
         return self.name
@@ -229,7 +228,7 @@ class Newsletter(models.Model):
     article_3_text = models.TextField(_('Article 3 - Text'), help_text=_(use_html_to_text_converter), default=_('<body>\n<!-- Edit your newsletter here -->\n</body>'), blank=True)
     article_3_image = models.ImageField(_('Article 3 - Image'), upload_to=upload_to, help_text=help_text_image, blank=True)
 
-    mailinglists = models.ManyToManyField(Category, verbose_name=_('mailing list'), related_name=('newsletters'),)
+    mailing_lists = models.ManyToManyField(Category, verbose_name=_('mailing list'), related_name=('newsletters'),)
     test_contacts = models.ManyToManyField(Contact, verbose_name=_('test contacts'), blank=True, null=True)
     server = models.ForeignKey(SMTPServer, verbose_name=_('smtp server'), default=1)
     header_sender = models.CharField(_('sender'), max_length=255, default=DEFAULT_HEADER_SENDER)
