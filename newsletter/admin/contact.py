@@ -15,13 +15,10 @@ from django.http import HttpResponseRedirect
 from django.contrib.admin.views.main import ChangeList
 from django.db import DatabaseError
 
-from emencia.django.newsletter.models import MailingList
-from emencia.django.newsletter.settings import USE_WORKGROUPS
-from emencia.django.newsletter.utils.importation import import_dispatcher
-from emencia.django.newsletter.utils.workgroups import request_workgroups
-from emencia.django.newsletter.utils.workgroups import request_workgroups_contacts_pk
-from emencia.django.newsletter.utils.vcard import vcard_contacts_export_response
-from emencia.django.newsletter.utils.excel import ExcelResponse
+from dry_newsletter.newsletter.models import MailingList
+from dry_newsletter.newsletter.utils.importation import import_dispatcher
+from dry_newsletter.newsletter.utils.vcard import vcard_contacts_export_response
+from dry_newsletter.newsletter.utils.excel import ExcelResponse
 
 
 contacts_imported = Signal(providing_args=['source', 'type'])
@@ -29,26 +26,16 @@ contacts_imported = Signal(providing_args=['source', 'type'])
 
 class ContactAdmin(admin.ModelAdmin):
     date_hierarchy = 'creation_date'
-    list_display = ('email', 'first_name', 'last_name', 'tags', 'tester', 'subscriber',
-                    'valid', 'total_subscriptions', 'creation_date', 'related_object_admin')
+    list_display = ('email', 'first_name', 'last_name', 'tester', 'subscriber', 'valid', 'total_subscriptions', 'creation_date', 'related_object_admin')
     list_filter = ('subscriber', 'valid', 'tester', 'creation_date', 'modification_date')
-    search_fields = ('email', 'first_name', 'last_name', 'tags')
+    search_fields = ('email', 'first_name', 'last_name')
     fieldsets = ((None, {'fields': ('email', 'first_name', 'last_name')}),
-                 (None, {'fields': ('tags',)}),
                  (_('Status'), {'fields': ('subscriber', 'valid', 'tester')}),
-                 (_('Advanced'), {'fields': ('object_id', 'content_type'),
-                                  'classes': ('collapse',)}),
+                 (_('Advanced'), {'fields': ('object_id', 'content_type'), 'classes': ('collapse',)}),
                  )
     actions = ['create_mailinglist', 'export_vcard', 'export_excel']
     actions_on_top = False
     actions_on_bottom = True
-
-    def queryset(self, request):
-        queryset = super(ContactAdmin, self).queryset(request)
-        if not request.user.is_superuser and USE_WORKGROUPS:
-            contacts_pk = request_workgroups_contacts_pk(request)
-            queryset = queryset.filter(pk__in=contacts_pk)
-        return queryset
 
     def save_model(self, request, contact, form, change):
         workgroups = []
