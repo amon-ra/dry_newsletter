@@ -88,48 +88,7 @@ class SMTPServer(models.Model):
         verbose_name = _('SMTP server')
         verbose_name_plural = _('SMTP servers')
 
-class MailingListGroup(models.Model):
-    title = models.CharField(_('title'), max_length=255)
 
-    class Meta:
-        ordering = ('title',)
-        verbose_name_plural = _('category groups')
-
-class MailingList(models.Model):
-    """Mailing list"""
-    name = models.CharField(_('name'), max_length=255)
-    description = models.TextField(_('description'), blank=True)
-    mailing_list_group = models.ForeignKey(MailingListGroup, verbose_name=_('category group'), blank=True, null=True)
-
-    subscribers = models.ManyToManyField(Contact, verbose_name=_('subscribers'),
-                                         related_name='mailinglist_subscriber')
-    unsubscribers = models.ManyToManyField(Contact, verbose_name=_('unsubscribers'),
-                                           related_name='mailinglist_unsubscriber',
-                                           null=True, blank=True)
-
-    creation_date = models.DateTimeField(_('creation date'), auto_now_add=True)
-    modification_date = models.DateTimeField(_('modification date'), auto_now=True)
-
-    def subscribers_count(self):
-        return self.subscribers.all().count()
-    subscribers_count.short_description = _('subscribers')
-
-    def unsubscribers_count(self):
-        return self.unsubscribers.all().count()
-    unsubscribers_count.short_description = _('unsubscribers')
-
-    def expedition_set(self):
-        unsubscribers_id = self.unsubscribers.values_list('id', flat=True)
-        return self.subscribers.valid_subscribers().exclude(
-            id__in=unsubscribers_id)
-
-    def __unicode__(self):
-        return self.name
-
-    class Meta:
-        ordering = ('-creation_date',)
-        verbose_name = _('mailing list')
-        verbose_name_plural = _('mailing lists')
 
 
 class Contact(models.Model):
@@ -184,16 +143,60 @@ class Contact(models.Model):
         return contact_name
 
     class Meta:
-        ordering = ('creation_date',)
+        ordering = ('last_name',)
         verbose_name = _('contact')
         verbose_name_plural = _('contacts')
 
 
+class MailingListGroup(models.Model):
+    title = models.CharField(_('title'), max_length=255)
 
+    class Meta:
+        ordering = ('title',)
+        verbose_name_plural = _('category groups')
+
+class MailingList(models.Model):
+    """Mailing list"""
+    name = models.CharField(_('name'), max_length=255)
+    description = models.TextField(_('description'), blank=True)
+    mailing_list_group = models.ForeignKey(MailingListGroup, verbose_name=_('category group'), blank=True, null=True)
+
+    subscribers = models.ManyToManyField(Contact, verbose_name=_('subscribers'), related_name='mailinglist_subscriber')
+    unsubscribers = models.ManyToManyField(Contact, verbose_name=_('unsubscribers'), related_name='mailinglist_unsubscriber', null=True, blank=True)
+
+    creation_date = models.DateTimeField(_('creation date'), auto_now_add=True)
+    modification_date = models.DateTimeField(_('modification date'), auto_now=True)
+
+    def subscribers_count(self):
+        return self.subscribers.all().count()
+    subscribers_count.short_description = _('subscribers')
+
+    def unsubscribers_count(self):
+        return self.unsubscribers.all().count()
+    unsubscribers_count.short_description = _('unsubscribers')
+
+    def expedition_set(self):
+        unsubscribers_id = self.unsubscribers.values_list('id', flat=True)
+        return self.subscribers.valid_subscribers().exclude(
+            id__in=unsubscribers_id)
+
+    def __unicode__(self):
+        return self.name
+
+    class Meta:
+        ordering = ('-creation_date',)
+        verbose_name = _('mailing list')
+        verbose_name_plural = _('mailing lists')
 
 
 class Newsletter(models.Model):
     """Newsletter to be sended to contacts"""
+
+    use_html_to_text_converter = _('IMPORTANT! DON\'T PASTE COPYED TEXT DIRECTLY IN THIS FIELD!!! Before pasting use an html to text converter such http://beaker.mailchimp.com/html-to-text or http://www.webtoolhub.com/tn561393-html-to-text-converter.aspx')
+    help_text_image = _('Upload a 300px width image. Do not insert white spaces in the image\'s name.')
+    def upload_to(self, filename):
+        return os.path.join("dry_newsletter", "img", self.slug, filename)
+
     DRAFT = 0
     WAITING = 1
     SENDING = 2
@@ -228,7 +231,6 @@ class Newsletter(models.Model):
 
     mailinglists = models.ManyToManyField(Category, verbose_name=_('mailing list'), related_name=('newsletters'),)
     test_contacts = models.ManyToManyField(Contact, verbose_name=_('test contacts'), blank=True, null=True)
-
     server = models.ForeignKey(SMTPServer, verbose_name=_('smtp server'), default=1)
     header_sender = models.CharField(_('sender'), max_length=255, default=DEFAULT_HEADER_SENDER)
     header_reply = models.CharField(_('reply to'), max_length=255, default=DEFAULT_HEADER_REPLY)
