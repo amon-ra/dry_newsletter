@@ -37,28 +37,6 @@ class ContactAdmin(admin.ModelAdmin):
     actions_on_top = False
     actions_on_bottom = True
 
-    def save_model(self, request, contact, form, change):
-        workgroups = []
-        if not contact.pk and not request.user.is_superuser \
-               and USE_WORKGROUPS:
-            workgroups = request_workgroups(request)
-        contact.save()
-        for workgroup in workgroups:
-            workgroup.contacts.add(contact)
-
-    def related_object_admin(self, contact):
-        """Display link to related object's admin"""
-        if contact.content_type and contact.object_id:
-            admin_url = reverse('admin:%s_%s_change' % (contact.content_type.app_label,
-                                                        contact.content_type.model),
-                                args=(contact.object_id,))
-            return '%s: <a href="%s">%s</a>' % (contact.content_type.model.capitalize(),
-                                                admin_url,
-                                                contact.content_object.__unicode__())
-        return _('No relative object')
-    related_object_admin.allow_tags = True
-    related_object_admin.short_description = _('Related object')
-
     def total_subscriptions(self, contact):
         """Display user subscriptions to unsubscriptions"""
         subscriptions = contact.subscriptions().count()
@@ -86,17 +64,11 @@ class ContactAdmin(admin.ModelAdmin):
         new_mailing.save()
 
         if 'lite' in settings.DATABASES['default']['ENGINE']:
-            self.message_user(request, _('SQLite3 or a SpatialLite database type detected, ' \
-                                         'please note you will be limited to 999 contacts ' \
-                                         'per mailing list.'))
+            self.message_user(request, _('SQLite3 or a SpatialLite database type detected, please note you will be limited to 999 contacts per mailing list.'))
         try:
             new_mailing.subscribers = queryset.all()
         except DatabaseError:
             new_mailing.subscribers = queryset.none()
-
-        if not request.user.is_superuser and USE_WORKGROUPS:
-            for workgroup in request_workgroups(request):
-                workgroup.mailinglists.add(new_mailing)
 
         self.message_user(request, _('%s succesfully created.') % new_mailing)
         return HttpResponseRedirect(reverse('admin:newsletter_mailinglist_change',
@@ -110,21 +82,15 @@ class ContactAdmin(admin.ModelAdmin):
         if request.POST:
             source = request.FILES.get('source') or \
                      StringIO.StringIO(request.POST.get('source', ''))
-            if not request.user.is_superuser and USE_WORKGROUPS:
-                workgroups = request_workgroups(request)
-            else:
-                workgroups = []
-            inserted = import_dispatcher(source, request.POST['type'],
-                                         workgroups)
+            inserted = import_dispatcher(source, request.POST['type'])
             if inserted:
-                contacts_imported.send(sender=self, source=source,
-                                       type=request.POST['type'])
+                contacts_imported.send(sender=self, source=source, type=request.POST['type'])
 
             self.message_user(request, _('%s contacts succesfully imported.') % inserted)
 
         context = {'title': _('Contact importation'),
                    'opts': opts,
-                   'root_path': self.admin_site.root_path,
+                   #'root_path': reverse('admin', current_app=opts.app_label),
                    'app_label': opts.app_label}
 
         return render_to_response('newsletter/contact_import.html',
