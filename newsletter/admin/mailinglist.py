@@ -12,7 +12,6 @@ from django.http import HttpResponseRedirect
 
 from dry_newsletter.newsletter.models import Contact
 from dry_newsletter.newsletter.models import MailingList
-from dry_newsletter.newsletter.utils.vcard import vcard_contacts_export_response
 from dry_newsletter.newsletter.utils.excel import ExcelResponse
 
 
@@ -55,12 +54,6 @@ class MailingListAdmin(admin.ModelAdmin):
         return HttpResponseRedirect(reverse('admin:newsletter_mailinglist_change', args=[new_mailing.pk]))
     merge_mailinglist.short_description = _('Merge selected mailinglists')
 
-    def exportion_vcard(self, request, mailinglist_id):
-        """Export subscribers in the mailing in VCard"""
-        mailinglist = get_object_or_404(MailingList, pk=mailinglist_id)
-        name = 'contacts_%s' % smart_str(mailinglist.name)
-        return vcard_contacts_export_response(mailinglist.subscribers.all(), name)
-
     def exportion_excel(self, request, mailinglist_id):
         """Export subscribers in the mailing in Excel"""
         mailinglist = get_object_or_404(MailingList, pk=mailinglist_id)
@@ -70,9 +63,6 @@ class MailingListAdmin(admin.ModelAdmin):
     def get_urls(self):
         urls = super(MailingListAdmin, self).get_urls()
         my_urls = patterns('',
-                           url(r'^export/vcard/(?P<mailinglist_id>\d+)/$',
-                               self.admin_site.admin_view(self.exportion_vcard),
-                               name='newsletter_mailinglist_export_vcard'),
                            url(r'^export/excel/(?P<mailinglist_id>\d+)/$',
                                self.admin_site.admin_view(self.exportion_excel),
                                name='newsletter_mailinglist_export_excel'))

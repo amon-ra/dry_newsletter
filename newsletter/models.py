@@ -18,7 +18,6 @@ from dry_newsletter.newsletter.settings import BASE_PATH
 from dry_newsletter.newsletter.settings import MAILER_HARD_LIMIT
 from dry_newsletter.newsletter.settings import DEFAULT_HEADER_REPLY
 from dry_newsletter.newsletter.settings import DEFAULT_HEADER_SENDER
-from dry_newsletter.newsletter.utils.vcard import vcard_contact_export
 
 
 class SMTPServer(models.Model):
@@ -117,9 +116,6 @@ class Contact(models.Model):
     def unsubscriptions(self):
         """Return the user unsubscriptions"""
         return MailingList.objects.filter(unsubscribers=self)
-
-    def vcard_format(self):
-        return vcard_contact_export(self)
 
     def mail_format(self):
         if self.first_name and self.last_name:

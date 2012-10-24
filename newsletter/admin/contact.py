@@ -17,7 +17,6 @@ from django.db import DatabaseError
 
 from dry_newsletter.newsletter.models import MailingList
 from dry_newsletter.newsletter.utils.importation import import_dispatcher
-from dry_newsletter.newsletter.utils.vcard import vcard_contacts_export_response
 from dry_newsletter.newsletter.utils.excel import ExcelResponse
 
 
@@ -33,7 +32,7 @@ class ContactAdmin(admin.ModelAdmin):
                  (_('Status'), {'fields': ('subscriber', 'valid', 'tester')}),
                  (_('Advanced'), {'fields': ('object_id', 'content_type'), 'classes': ('collapse',)}),
                  )
-    actions = ['create_mailinglist', 'export_vcard', 'export_excel']
+    actions = ['create_mailinglist', 'export_excel']
     actions_on_top = False
     actions_on_bottom = True
 
@@ -43,11 +42,6 @@ class ContactAdmin(admin.ModelAdmin):
         unsubscriptions = contact.unsubscriptions().count()
         return '%s / %s' % (subscriptions - unsubscriptions, subscriptions)
     total_subscriptions.short_description = _('Total subscriptions')
-
-    def export_vcard(self, request, queryset, export_name=''):
-        """Export selected contact in VCard"""
-        return vcard_contacts_export_response(queryset)
-    export_vcard.short_description = _('Export contacts as VCard')
 
     def export_excel(self, request, queryset, export_name=''):
         """Export selected contact in Excel"""
@@ -107,10 +101,6 @@ class ContactAdmin(admin.ModelAdmin):
         """Create a mailing list form the filtered contacts"""
         return self.create_mailinglist(request, self.filtered_request_queryset(request))
 
-    def exportation_vcard(self, request):
-        """Export filtered contacts in VCard"""
-        return self.export_vcard(request, self.filtered_request_queryset(request), 'contacts_edn_%s' % datetime.now().strftime('%d-%m-%Y'))
-
     def exportation_excel(self, request):
         """Export filtered contacts in Excel"""
         return self.export_excel(request, self.filtered_request_queryset(request), 'contacts_edn_%s' % datetime.now().strftime('%d-%m-%Y'))
@@ -124,9 +114,6 @@ class ContactAdmin(admin.ModelAdmin):
                            url(r'^create_mailinglist/$',
                                self.admin_site.admin_view(self.creation_mailinglist),
                                name='newsletter_contact_create_mailinglist'),
-                           url(r'^export/vcard/$',
-                               self.admin_site.admin_view(self.exportation_vcard),
-                               name='newsletter_contact_export_vcard'),
                            url(r'^export/excel/$',
                                self.admin_site.admin_view(self.exportation_excel),
                                name='newsletter_contact_export_excel'),)

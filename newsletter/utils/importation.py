@@ -64,20 +64,6 @@ def create_contacts(contact_dicts, importer_name, workgroups=[]):
     return inserted
 
 
-def vcard_contacts_import(stream, workgroups=[]):
-    """Import contacts from a VCard file"""
-    contacts = []
-    vcards = vobject.readComponents(stream)
-
-    for vcard in vcards:
-        contact = {'email': vcard.email.value,
-                   'first_name': vcard.n.value.given,
-                   'last_name': vcard.n.value.family}
-        contacts.append(contact)
-
-    return create_contacts(contacts, 'vcard', workgroups)
-
-
 def text_contacts_import(stream, workgroups=[]):
     """Import contact from a plaintext file, like CSV"""
     contacts = []
@@ -113,9 +99,7 @@ def excel_contacts_import(stream, workgroups=[]):
 
 def import_dispatcher(source, type_, workgroups):
     """Select importer and import contacts"""
-    if type_ == 'vcard':
-        return vcard_contacts_import(source, workgroups)
-    elif type_ == 'text':
+    if type_ == 'text':
         return text_contacts_import(source, workgroups)
     elif type_ == 'excel':
         return excel_contacts_import(source, workgroups)
