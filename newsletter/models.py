@@ -13,7 +13,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Group
 from django.utils.encoding import force_unicode
 
-from tagging.fields import TagField
 from dry_newsletter.newsletter.managers import ContactManager
 from dry_newsletter.newsletter.settings import BASE_PATH
 from dry_newsletter.newsletter.settings import MAILER_HARD_LIMIT
