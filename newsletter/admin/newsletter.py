@@ -21,17 +21,19 @@ except ImportError:
 
 class BaseNewsletterAdmin(admin.ModelAdmin):
     date_hierarchy = 'creation_date'
-    list_display = ('title', 'mailing_list', 'server', 'status', 'sending_date', 'creation_date', 'modification_date',)
+    list_display = ('title', 'server', 'status', 'sending_date', 'creation_date', 'modification_date',)
     list_filter = ('status', 'sending_date', 'creation_date', 'modification_date')
     search_fields = ('title', 'content', 'header_sender', 'header_reply')
     filter_horizontal = ['test_contacts']
     fieldsets = ((None, {'fields': ('title', 'content',)}),
-                 (_('Receivers'), {'fields': ('mailing_list', 'test_contacts',)}),
+                 (_('Article 1'), {'fields': ('article_1_title', 'article_1_subtitle', 'article_1_text', 'article_1_image')}),
+                 (_('Article 2'), {'fields': ('article_2_title', 'article_2_subtitle', 'article_2_text', 'article_2_image'), 'classes': ('collapse',)}),
+                 (_('Article 3'), {'fields': ('article_3_title', 'article_3_subtitle', 'article_3_text', 'article_3_image'), 'classes': ('collapse',)}),
+                 (_('Receivers'), {'fields': ('mailing_lists', 'test_contacts',)}),
                  (_('Sending'), {'fields': ('sending_date', 'status',)}),
-                 (_('Miscellaneous'), {'fields': ('server', 'header_sender', 'header_reply', 'slug'),'classes': ('collapse',)}),
+                 (_('Miscellaneous'), {'fields': ('server', 'header_sender', 'header_reply', 'slug'), 'classes': ('collapse',)}),
                  )
     prepopulated_fields = {'slug': ('title',)}
-    inlines = (AttachmentAdminInline,)
     actions = ['send_mail_test', 'make_ready_to_send', 'make_cancel_sending']
     actions_on_top = False
     actions_on_bottom = True

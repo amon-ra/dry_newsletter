@@ -98,7 +98,6 @@ class Contact(models.Model):
     subscriber = models.BooleanField(_('subscriber'), default=True)
     valid = models.BooleanField(_('valid email'), default=True)
     tester = models.BooleanField(_('contact tester'), default=False)
-    tags = TagField(_('tags'))
 
     content_type = models.ForeignKey(ContentType, blank=True, null=True)
     object_id = models.PositiveIntegerField(blank=True, null=True)
@@ -133,8 +132,6 @@ class Contact(models.Model):
             contact_name = '%s %s' % (self.last_name, self.first_name)
         else:
             contact_name = self.email
-        if self.tags:
-            return '%s | %s' % (contact_name, self.tags)
         return contact_name
 
     class Meta:
@@ -223,7 +220,7 @@ class Newsletter(models.Model):
     article_3_text = models.TextField(_('Article 3 - Text'), help_text=_(use_html_to_text_converter), default=_('<body>\n<!-- Edit your newsletter here -->\n</body>'), blank=True)
     article_3_image = models.ImageField(_('Article 3 - Image'), upload_to=upload_to, help_text=help_text_image, blank=True)
 
-    mailing_lists = models.ManyToManyField(Category, verbose_name=_('mailing list'), related_name=('newsletters'),)
+    mailing_lists = models.ManyToManyField(MailingList, verbose_name=_('mailing list'), related_name=('newsletters'),)
     test_contacts = models.ManyToManyField(Contact, verbose_name=_('test contacts'), blank=True, null=True)
     server = models.ForeignKey(SMTPServer, verbose_name=_('smtp server'), default=1)
     header_sender = models.CharField(_('sender'), max_length=255, default=DEFAULT_HEADER_SENDER)

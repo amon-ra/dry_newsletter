@@ -1,4 +1,4 @@
-"""Mailer for emencia.django.newsletter"""
+"""Mailer for dry_newsletter.newsletter"""
 import re
 import sys
 import time
@@ -33,20 +33,17 @@ from django.template.loader import render_to_string
 from django.utils.encoding import smart_str
 from django.utils.encoding import smart_unicode
 
-from emencia.django.newsletter.models import Newsletter
-from emencia.django.newsletter.models import ContactMailingStatus
-from emencia.django.newsletter.utils.tokens import tokenize
-from emencia.django.newsletter.utils.newsletter import track_links
-from emencia.django.newsletter.utils.newsletter import body_insertion
-from emencia.django.newsletter.settings import TRACKING_LINKS
-from emencia.django.newsletter.settings import TRACKING_IMAGE
-from emencia.django.newsletter.settings import TRACKING_IMAGE_FORMAT
-from emencia.django.newsletter.settings import UNIQUE_KEY_LENGTH
-from emencia.django.newsletter.settings import UNIQUE_KEY_CHAR_SET
-from emencia.django.newsletter.settings import INCLUDE_UNSUBSCRIPTION
-from emencia.django.newsletter.settings import SLEEP_BETWEEN_SENDING
-from emencia.django.newsletter.settings import \
-     RESTART_CONNECTION_BETWEEN_SENDING
+from dry_newsletter.newsletter.models import Newsletter
+from dry_newsletter.newsletter.models import ContactMailingStatus
+from dry_newsletter.newsletter.utils.tokens import tokenize
+from dry_newsletter.newsletter.settings import TRACKING_LINKS
+from dry_newsletter.newsletter.settings import TRACKING_IMAGE
+from dry_newsletter.newsletter.settings import TRACKING_IMAGE_FORMAT
+from dry_newsletter.newsletter.settings import UNIQUE_KEY_LENGTH
+from dry_newsletter.newsletter.settings import UNIQUE_KEY_CHAR_SET
+from dry_newsletter.newsletter.settings import INCLUDE_UNSUBSCRIPTION
+from dry_newsletter.newsletter.settings import SLEEP_BETWEEN_SENDING
+from dry_newsletter.newsletter.settings import RESTART_CONNECTION_BETWEEN_SENDING
 
 
 if not hasattr(timedelta, 'total_seconds'):
@@ -126,7 +123,7 @@ class NewsLetterSender(object):
                            'newsletter': self.newsletter,
                            'tracking_image_format': TRACKING_IMAGE_FORMAT,
                            'uidb36': uidb36, 'token': token,
-                           'MEDIA_URL': settings.MEDIA_URL })})
+                           'MEDIA_URL': settings.MEDIA_URL})
         content = self.newsletter_template.render(context)
         if TRACKING_LINKS:
             content = track_links(content, context)
@@ -173,7 +170,7 @@ class NewsLetterSender(object):
         already_sent = ContactMailingStatus.objects.filter(status=ContactMailingStatus.SENT, newsletter=self.newsletter).values_list('contact__id', flat=True)
 
         expedition_list = []
-        for ml in self.newsletter.mailing_lists.all()
+        for ml in self.newsletter.mailing_lists.all():
             contacts = ml.expedition_set().exclude(id__in=already_sent)
             expedition_list.append(contacts)
         return sorted(set(expedition_list))

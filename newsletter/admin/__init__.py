@@ -1,18 +1,17 @@
-"""Admin for emencia.django.newsletter"""
+"""Admin for dry_newsletter.newsletter"""
 from django.contrib import admin
 from django.conf import settings
 
-from emencia.django.newsletter.models import Link
-from emencia.django.newsletter.models import Contact
-from emencia.django.newsletter.models import SMTPServer
-from emencia.django.newsletter.models import Newsletter
-from emencia.django.newsletter.models import MailingList
-from emencia.django.newsletter.models import ContactMailingStatus
+from dry_newsletter.newsletter.models import Contact
+from dry_newsletter.newsletter.models import SMTPServer
+from dry_newsletter.newsletter.models import Newsletter
+from dry_newsletter.newsletter.models import MailingList
+from dry_newsletter.newsletter.models import ContactMailingStatus
 
-from emencia.django.newsletter.admin.contact import ContactAdmin
-from emencia.django.newsletter.admin.newsletter import NewsletterAdmin
-from emencia.django.newsletter.admin.smtpserver import SMTPServerAdmin
-from emencia.django.newsletter.admin.mailinglist import MailingListAdmin
+from dry_newsletter.newsletter.admin.contact import ContactAdmin
+from dry_newsletter.newsletter.admin.newsletter import NewsletterAdmin
+from dry_newsletter.newsletter.admin.smtpserver import SMTPServerAdmin
+from dry_newsletter.newsletter.admin.mailinglist import MailingListAdmin
 
 
 admin.site.register(Contact, ContactAdmin)
