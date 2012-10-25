@@ -8,8 +8,8 @@ from django.utils.translation import activate
 from django.core import signals
 from django.core.management.base import NoArgsCommand
 
-from emencia.django.newsletter.mailer import SMTPMailer
-from emencia.django.newsletter.models import SMTPServer
+from dry_newsletter.newsletter.mailer import SMTPMailer
+from dry_newsletter.newsletter.models import SMTPServer
 
 
 class Command(NoArgsCommand):

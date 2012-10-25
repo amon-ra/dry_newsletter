@@ -3,8 +3,8 @@ from django.conf import settings
 from django.utils.translation import activate
 from django.core.management.base import NoArgsCommand
 
-from emencia.django.newsletter.mailer import Mailer
-from emencia.django.newsletter.models import Newsletter
+from dry_newsletter.newsletter.mailer import Mailer
+from dry_newsletter.newsletter.models import Newsletter
 
 
 class Command(NoArgsCommand):

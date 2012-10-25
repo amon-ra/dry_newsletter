@@ -10,20 +10,12 @@ from datetime import datetime
 from datetime import timedelta
 from smtplib import SMTPRecipientsRefused
 
-try:
-    from email.mime.multipart import MIMEMultipart
-    from email.mime.text import MIMEText
-    from email.mime.Encoders import encode_base64
-    from email.mime.MIMEAudio import MIMEAudio
-    from email.mime.MIMEBase import MIMEBase
-    from email.mime.MIMEImage import MIMEImage
-except ImportError:  # Python 2.4 compatibility
-    from email.MIMEMultipart import MIMEMultipart
-    from email.MIMEText import MIMEText
-    from email.Encoders import encode_base64
-    from email.MIMEAudio import MIMEAudio
-    from email.MIMEBase import MIMEBase
-    from email.MIMEImage import MIMEImage
+from email.MIMEMultipart import MIMEMultipart
+from email.MIMEText import MIMEText
+from email.Encoders import encode_base64
+from email.MIMEAudio import MIMEAudio
+from email.MIMEBase import MIMEBase
+from email.MIMEImage import MIMEImage
 from email import message_from_file
 from html2text import html2text as html2text_orig
 from django.conf import settings
@@ -32,13 +24,11 @@ from django.template import Context, Template
 from django.template.loader import render_to_string
 from django.utils.encoding import smart_str
 from django.utils.encoding import smart_unicode
+from django.utils.timezone import utc
 
 from dry_newsletter.newsletter.models import Newsletter
 from dry_newsletter.newsletter.models import ContactMailingStatus
 from dry_newsletter.newsletter.utils.tokens import tokenize
-from dry_newsletter.newsletter.settings import TRACKING_LINKS
-from dry_newsletter.newsletter.settings import TRACKING_IMAGE
-from dry_newsletter.newsletter.settings import TRACKING_IMAGE_FORMAT
 from dry_newsletter.newsletter.settings import UNIQUE_KEY_LENGTH
 from dry_newsletter.newsletter.settings import UNIQUE_KEY_CHAR_SET
 from dry_newsletter.newsletter.settings import INCLUDE_UNSUBSCRIPTION
@@ -57,7 +47,6 @@ else:
 
 LINK_RE = re.compile(r"https?://([^ \n]+\n)+[^ \n]+", re.MULTILINE)
 
-
 def html2text(html):
     """Use html2text but repair newlines cutting urls.
     Need to use this hack until
@@ -72,7 +61,6 @@ def html2text(html):
         pos = l.end()
     out.write(txt[pos:])
     return out.getvalue()
-
 
 class NewsLetterSender(object):
 
@@ -90,6 +78,7 @@ class NewsLetterSender(object):
         all the attached files.
         """
         content_html = self.build_email_content(contact)
+
         content_text = html2text(content_html)
 
         message = MIMEMultipart()
@@ -106,7 +95,6 @@ class NewsLetterSender(object):
 
         for header, value in self.newsletter.server.custom_headers.items():
             message[header] = value
-
         return message
 
     def build_title_content(self, contact):
@@ -121,18 +109,15 @@ class NewsLetterSender(object):
         context = Context({'contact': contact,
                            'domain': Site.objects.get_current().domain,
                            'newsletter': self.newsletter,
-                           'tracking_image_format': TRACKING_IMAGE_FORMAT,
                            'uidb36': uidb36, 'token': token,
                            'MEDIA_URL': settings.MEDIA_URL})
         content = self.newsletter_template.render(context)
-        if TRACKING_LINKS:
-            content = track_links(content, context)
-        link_site = render_to_string('newsletter/newsletter_link_site.html', context)
-        content = body_insertion(content, link_site)
+        # link_site = render_to_string('newsletter/newsletter_link_site.html', context)
+        # content = body_insertion(content, link_site)
 
-        if INCLUDE_UNSUBSCRIPTION:
-            unsubscription = render_to_string('newsletter/newsletter_link_unsubscribe.html', context)
-            content = body_insertion(content, unsubscription, end=True)
+        #if INCLUDE_UNSUBSCRIPTION:
+        #    unsubscription = render_to_string('newsletter/newsletter_link_unsubscribe.html', context)
+        #    content = body_insertion(content, unsubscription, end=True)
         return smart_unicode(content)
 
     def update_newsletter_status(self):
@@ -142,9 +127,7 @@ class NewsLetterSender(object):
 
         if self.newsletter.status == Newsletter.WAITING:
             self.newsletter.status = Newsletter.SENDING
-        if self.newsletter.status == Newsletter.SENDING and \
-               self.newsletter.mails_sent() >= \
-               self.newsletter.mailing_list.expedition_set().count():
+        if self.newsletter.status == Newsletter.SENDING and self.newsletter.mails_sent() >= len(self.expedition_list):
             self.newsletter.status = Newsletter.SENT
         self.newsletter.save()
 
@@ -154,7 +137,9 @@ class NewsLetterSender(object):
         if self.test:
             return True
 
-        if self.newsletter.sending_date <= datetime.now() and \
+        # Modified according to http://stackoverflow.com/questions/11012945/emencia-django-newsletter-datetime-problems-with-django-1-4
+        now = datetime.utcnow().replace(tzinfo=utc)
+        if self.newsletter.sending_date <= now and \
                (self.newsletter.status == Newsletter.WAITING or \
                 self.newsletter.status == Newsletter.SENDING):
             return True
@@ -172,7 +157,7 @@ class NewsLetterSender(object):
         expedition_list = []
         for ml in self.newsletter.mailing_lists.all():
             contacts = ml.expedition_set().exclude(id__in=already_sent)
-            expedition_list.append(contacts)
+            expedition_list += contacts
         return sorted(set(expedition_list))
 
     def update_contact_status(self, contact, exception):
