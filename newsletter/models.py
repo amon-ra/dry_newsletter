@@ -12,6 +12,7 @@ from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Group
 from django.utils.encoding import force_unicode
+from django.utils.timezone import utc
 
 from dry_newsletter.newsletter.managers import ContactManager
 from dry_newsletter.newsletter.settings import BASE_PATH
@@ -60,7 +61,7 @@ class SMTPServer(models.Model):
         if not self.mails_hour:
             return MAILER_HARD_LIMIT
 
-        last_hour = datetime.now() - timedelta(hours=1)
+        last_hour = datetime.utcnow().replace(tzinfo=utc) - timedelta(hours=1)
         sent_last_hour = ContactMailingStatus.objects.filter(
             models.Q(status=ContactMailingStatus.SENT) |
             models.Q(status=ContactMailingStatus.SENT_TEST),
@@ -226,7 +227,7 @@ class Newsletter(models.Model):
     header_sender = models.CharField(_('sender'), max_length=255, default=DEFAULT_HEADER_SENDER)
     header_reply = models.CharField(_('reply to'), max_length=255, default=DEFAULT_HEADER_REPLY)
     status = models.IntegerField(_('status'), choices=STATUS_CHOICES, default=DRAFT)
-    sending_date = models.DateTimeField(_('sending date'), default=datetime.now)
+    sending_date = models.DateTimeField(_('sending date'), default=datetime.utcnow().replace(tzinfo=utc))
     slug = models.SlugField(help_text=_('Used for displaying the newsletter on the site.'), unique=True)
     creation_date = models.DateTimeField(_('creation date'), auto_now_add=True)
     modification_date = models.DateTimeField(_('modification date'), auto_now=True)
