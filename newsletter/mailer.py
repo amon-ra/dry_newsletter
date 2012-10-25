@@ -127,7 +127,13 @@ class NewsLetterSender(object):
 
         if self.newsletter.status == Newsletter.WAITING:
             self.newsletter.status = Newsletter.SENDING
-        if self.newsletter.status == Newsletter.SENDING and self.newsletter.mails_sent() >= len(self.expedition_list):
+            
+        should_be_sent_mails = []
+        for ml in self.newsletter.mailing_lists.all():
+            should_be_sent_mails += ml.expedition_set() # Ricalcolo la expedition_list ma senza eliminare i contatti a cui la mail e gia stata spedita
+        should_be_sent_mails = set(should_be_sent_mails)
+            
+        if self.newsletter.status == Newsletter.SENDING and self.newsletter.mails_sent() >= len(should_be_sent_mails):
             self.newsletter.status = Newsletter.SENT
         self.newsletter.save()
 
@@ -138,8 +144,7 @@ class NewsLetterSender(object):
             return True
 
         # Modified according to http://stackoverflow.com/questions/11012945/emencia-django-newsletter-datetime-problems-with-django-1-4
-        now = datetime.utcnow().replace(tzinfo=utc)
-        if self.newsletter.sending_date <= now and \
+        if self.newsletter.sending_date <= datetime.utcnow().replace(tzinfo=utc) and \
                (self.newsletter.status == Newsletter.WAITING or \
                 self.newsletter.status == Newsletter.SENDING):
             return True
