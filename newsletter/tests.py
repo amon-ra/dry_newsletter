@@ -353,26 +353,6 @@ class MailerTestCase(TestCase):
         mailer.update_newsletter_status()
         self.assertEquals(self.newsletter.status, Newsletter.SENT)
 
-    """
-    def setUp(self):
-        self.server = SMTPServer.objects.create(name='Test SMTP',
-                                                host='smtp.domain.com',
-                                                mails_hour=100)
-        self.contacts = [Contact.objects.create(email='test1@domain.com'),
-                         Contact.objects.create(email='test2@domain.com'),
-                         Contact.objects.create(email='test3@domain.com'),
-                         Contact.objects.create(email='test4@domain.com')]
-        self.mailinglist = MailingList.objects.create(name='Test MailingList')
-        self.mailinglist.subscribers.add(*self.contacts)
-        self.newsletter = Newsletter.objects.create(title='Test Newsletter',
-                                                    content='Test Newsletter Content',
-                                                    slug='test-newsletter',
-                                                    server=self.server,
-                                                    status=Newsletter.WAITING)
-        self.newsletter.mailing_lists.add(self.mailinglist)
-        self.newsletter.test_contacts.add(*self.contacts[:2])
-    """
-
     def test_update_newsletter_status_advanced(self):
         self.server.mails_hour = 2
         self.server.save()
