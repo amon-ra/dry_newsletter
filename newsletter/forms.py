@@ -1,10 +1,10 @@
 
-"""Forms for emencia.django.newsletter"""
+"""Forms for dry_newsletter.newsletter"""
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 
-from emencia.django.newsletter.models import Contact
-from emencia.django.newsletter.models import MailingList
+from dry_newsletter.newsletter.models import Contact
+from dry_newsletter.newsletter.models import MailingList
 
 
 class MailingListSubscriptionForm(forms.ModelForm):

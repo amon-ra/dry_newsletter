@@ -1,12 +1,12 @@
-"""Views for dry_django.newsletter Mailing List"""
+"""Views for dry_newsletter.newsletter Mailing List"""
 from django.template import RequestContext
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render_to_response
 
-from dry_django.newsletter.utils.tokens import untokenize
-from dry_django.newsletter.models import Newsletter
-from dry_django.newsletter.models import MailingList
-from dry_django.newsletter.models import ContactMailingStatus
+from dry_newsletter.newsletter.utils.tokens import untokenize
+from dry_newsletter.newsletter.models import Newsletter
+from dry_newsletter.newsletter.models import MailingList
+from dry_newsletter.newsletter.models import ContactMailingStatus
 
 
 def view_mailinglist_unsubscribe(request, slug, uidb36, token):

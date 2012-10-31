@@ -49,8 +49,6 @@
                         @media only screen and (min-device-width: 768px) and (max-device-width: 1024px)  {          
  
                         }              
- 						
- 						#logo {width:250px}
        </style>   
      
 </head>
@@ -64,7 +62,7 @@
 		<div style="background-color:#c5d5da;text-align:center;font-size:100%">
 			<br>
 			<br>
-			<p>Se non visualizzi correttamente questa email <a href="http://{{ domain }}{% url dry_newsletter slug=newsletter.slug %}" target="_blank">clicca qui</a>.</p>
+			<p>Se non visualizzi correttamente questa email <a href="http://{{ domain }}{% url newsletter_newsletter_online_version slug=newsletter.slug %}" target="_blank">clicca qui</a>.</p>
 			<br>
 			</a>
 			<br>
@@ -73,7 +71,7 @@
 			<table cellspacing="0" cellpadding="0" style="width:619px;margin:0 auto;text-align:left;background-color:white">
 				<tbody>
 					<tr>
-						<td><img id="logo" src="http://www.iperborea.com/static/website/logo_25_anni.png" editable="true" label="Logo Iperborea"></td>
+						<td><img style="width:250px" src="http://www.iperborea.com/static/website/logo_25_anni.png" editable="true" label="Logo Iperborea"></td>
 					</tr>
 					<tr>
 						<td style="font-family:Gill Sans,GillSans,Lucida Grande,Lucida Sans Unicode,Verdana,Arial,sans-serif;color:#6e8798;padding:0 20px;vertical-align:bottom">	

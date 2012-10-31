@@ -1,4 +1,6 @@
 """Models for dry_newsletter.newsletter"""
+import os
+
 from smtplib import SMTP
 from smtplib import SMTPHeloError
 from datetime import datetime
