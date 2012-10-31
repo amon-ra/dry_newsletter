@@ -22,12 +22,10 @@ class CommonMedia:
         'all': ('/media/dojo/editor.css',),
     }
 
-
 admin.site.register(Contact, ContactAdmin)
 admin.site.register(SMTPServer, SMTPServerAdmin)
 admin.site.register(Newsletter, NewsletterAdmin, Media=CommonMedia)
 admin.site.register(MailingList, MailingListAdmin)
-
 
 if settings.DEBUG:
     admin.site.register(ContactMailingStatus)

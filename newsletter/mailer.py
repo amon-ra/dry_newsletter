@@ -22,6 +22,7 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 from django.template import Context, Template
 from django.template.loader import render_to_string
+from django.template import loader
 from django.utils.encoding import smart_str
 from django.utils.encoding import smart_unicode
 from django.utils.timezone import utc
@@ -68,7 +69,7 @@ class NewsLetterSender(object):
         self.test = test
         self.verbose = verbose
         self.newsletter = newsletter
-        self.newsletter_template = Template(self.newsletter.content)
+        self.newsletter_template = loader.get_template('newsletter/newsletter_detail.html')
         self.title_template = Template(self.newsletter.title)
 
     def build_message(self, contact):
