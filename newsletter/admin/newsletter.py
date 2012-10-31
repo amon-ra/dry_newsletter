@@ -23,7 +23,7 @@ class BaseNewsletterAdmin(admin.ModelAdmin):
     list_display = ('title', 'server', 'status', 'sending_date', 'creation_date', 'modification_date',)
     list_filter = ('status', 'sending_date', 'creation_date', 'modification_date')
     search_fields = ('title', 'header_sender', 'header_reply')
-    filter_horizontal = ['test_contacts']
+    filter_horizontal = ['mailing_lists', 'test_contacts']
     fieldsets = ((None, {'fields': ('title',)}),
                  (_('Article 1'), {'fields': ('article_1_title', 'article_1_subtitle', 'article_1_text', 'article_1_image')}),
                  (_('Article 2'), {'fields': ('article_2_title', 'article_2_subtitle', 'article_2_text', 'article_2_image'), 'classes': ('collapse',)}),
@@ -33,7 +33,7 @@ class BaseNewsletterAdmin(admin.ModelAdmin):
                  (_('Miscellaneous'), {'fields': ('server', 'header_sender', 'header_reply', 'slug'), 'classes': ('collapse',)}),
                  )
     prepopulated_fields = {'slug': ('title',)}
-    actions = ['send_mail_test', 'make_ready_to_send', 'make_cancel_sending']
+    actions = ['send_mail_test', 'make_ready_to_send', 'make_cancel_sending', 'send_newsletter']
     actions_on_top = False
     actions_on_bottom = True
 
@@ -93,6 +93,20 @@ class BaseNewsletterAdmin(admin.ModelAdmin):
             newsletter.save()
         self.message_user(request, _('%s newletters are cancelled') % queryset.count())
     make_cancel_sending.short_description = _('Cancel the sending')
+
+    def send_newsletter(self, request, queryset):
+        """Send newsletter in queue"""
+        for newsletter in Newsletter.objects.exclude(
+            status=Newsletter.DRAFT).exclude(status=Newsletter.SENT):
+            mailer = Mailer(newsletter)
+            if mailer.can_send:
+                try:
+                    mailer.run()
+                except HTMLParseError:
+                    self.message_user(request, _('Unable to send newsletter, due to errors within HTML.'))
+                    continue
+                self.message_user(request, _('%s succesfully sent.') % newsletter)
+    send_newsletter.short_description = _('Send newsletter')
 
 class NewsletterAdmin(BaseNewsletterAdmin):
     pass

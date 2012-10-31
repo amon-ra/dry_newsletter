@@ -33,7 +33,7 @@ class MailSendingTestCase(TestCase):
         self.mailing_list_2 = MailingList.objects.create(name='Giornalisti')
         self.mailing_list_1.subscribers.add(self.contact_1)
         self.mailing_list_2.subscribers.add(self.contact_1, self.contact_2)
-        self.newsletter = Newsletter.objects.create(title='Test Newsletter', content='Test Newsletter Content', slug='newsletter_1', server=self.server)
+        self.newsletter = Newsletter.objects.create(title='Test Newsletter', article_1_text='Test Newsletter article 1 text', slug='newsletter_1', server=self.server)
         self.newsletter.mailing_lists.add(self.mailing_list_1, self.mailing_list_2)
         self.newsletter.status = Newsletter.WAITING
         self.newsletter.save()
@@ -79,17 +79,17 @@ class SMTPServerTestCase(TestCase):
         self.mailinglist.subscribers.add(self.contact)
 
         self.newsletter = Newsletter.objects.create(title='Test Newsletter',
-                                                    content='Test Newsletter Content',
+                                                    article_1_text='Test Newsletter21 text',
                                                     server=self.server, slug='test-nl')
         self.newsletter.mailing_lists.add(self.mailinglist)
 
         self.newsletter_2 = Newsletter.objects.create(title='Test Newsletter 2',
-                                                      content='Test Newsletter 2 Content',
+                                                      article_1_text='Test Newsletter2 text',
                                                       server=self.server, slug='test-nl-2')
         self.newsletter_2.mailing_lists.add(self.mailinglist)
 
-        self.newsletter_3 = Newsletter.objects.create(title='Test Newsletter 2',
-                                                      content='Test Newsletter 2 Content',
+        self.newsletter_3 = Newsletter.objects.create(title='Test Newsletter 3',
+                                                      article_1_text='Test Newsletter2 text',
                                                       server=self.server_2, slug='test-nl-3')
         self.newsletter_2.mailing_lists.add(self.mailinglist)
 
@@ -211,7 +211,7 @@ class NewsletterTestCase(TestCase):
         self.contact = Contact.objects.create(email='test@domain.com')
         self.mailinglist = MailingList.objects.create(name='Test MailingList')
         self.newsletter = Newsletter.objects.create(title='Test Newsletter',
-                                                    content='Test Newsletter Content',
+                                                    article_1_text='Test Newsletter article text',
                                                     server=self.server)
         self.newsletter.mailing_lists.add(self.mailinglist)
 
@@ -253,7 +253,7 @@ class MailerTestCase(TestCase):
         self.mailinglist = MailingList.objects.create(name='Test MailingList')
         self.mailinglist.subscribers.add(*self.contacts)
         self.newsletter = Newsletter.objects.create(title='Test Newsletter',
-                                                    content='Test Newsletter Content',
+                                                    article_1_text='Test Newsletter Content',
                                                     slug='test-newsletter',
                                                     server=self.server,
                                                     status=Newsletter.WAITING)
