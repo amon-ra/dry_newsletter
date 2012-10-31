@@ -18,7 +18,6 @@ try:
 except ImportError:
     CAN_USE_PREMAILER = False
 
-
 class BaseNewsletterAdmin(admin.ModelAdmin):
     date_hierarchy = 'creation_date'
     list_display = ('title', 'server', 'status', 'sending_date', 'creation_date', 'modification_date',)
