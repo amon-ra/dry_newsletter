@@ -186,7 +186,7 @@ class MailingList(models.Model):
 class Newsletter(models.Model):
     """Newsletter to be sended to contacts"""
 
-    use_html_to_text_converter = _('IMPORTANT! DON\'T PASTE COPYED TEXT DIRECTLY IN THIS FIELD!!! Before pasting use an html to text converter such http://beaker.mailchimp.com/html-to-text or http://www.webtoolhub.com/tn561393-html-to-text-converter.aspx')
+    use_html_to_text_converter = _('IMPORTANT! DON\'T PASTE COPYED TEXT DIRECTLY IN THIS FIELD!!! Before pasting use an html-to-text converter such as http://www.webtoolhub.com/tn561393-html-to-text-converter.aspx')
     help_text_image = _('Upload a 300px width image. Do not insert white spaces in the image\'s name.')
     def upload_to(self, filename):
         return os.path.join("dry_newsletter", "img", self.slug, filename)
@@ -205,7 +205,6 @@ class Newsletter(models.Model):
                       )
 
     title = models.CharField(_('title'), max_length=255, help_text=_('You can use the "{{ UNIQUE_KEY }}" variable for unique identifier within the newsletter\'s title.'))
-    content = models.TextField(_('content'), help_text=_('Or paste an URL.'), default=_('<body>\n<!-- Edit your newsletter here -->\n</body>'))
 
     article_1_title = models.CharField(_('Article 1 - Title'), max_length=255, blank=True)
     article_1_subtitle = models.CharField(_('Article 1 - Subtitle'), max_length=255, blank=True)

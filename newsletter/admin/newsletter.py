@@ -22,9 +22,9 @@ class BaseNewsletterAdmin(admin.ModelAdmin):
     date_hierarchy = 'creation_date'
     list_display = ('title', 'server', 'status', 'sending_date', 'creation_date', 'modification_date',)
     list_filter = ('status', 'sending_date', 'creation_date', 'modification_date')
-    search_fields = ('title', 'content', 'header_sender', 'header_reply')
+    search_fields = ('title', 'header_sender', 'header_reply')
     filter_horizontal = ['test_contacts']
-    fieldsets = ((None, {'fields': ('title', 'content',)}),
+    fieldsets = ((None, {'fields': ('title',)}),
                  (_('Article 1'), {'fields': ('article_1_title', 'article_1_subtitle', 'article_1_text', 'article_1_image')}),
                  (_('Article 2'), {'fields': ('article_2_title', 'article_2_subtitle', 'article_2_text', 'article_2_image'), 'classes': ('collapse',)}),
                  (_('Article 3'), {'fields': ('article_3_title', 'article_3_subtitle', 'article_3_text', 'article_3_image'), 'classes': ('collapse',)}),
