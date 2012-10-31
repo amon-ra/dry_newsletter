@@ -1,10 +1,13 @@
 """ModelAdmin for Newsletter"""
 from HTMLParser import HTMLParseError
+from StringIO import StringIO
+from copy import copy
 
 from django import forms
 from django.db.models import Q
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
+from django.core.management import call_command
 
 from dry_newsletter.newsletter.models import Contact
 from dry_newsletter.newsletter.models import Newsletter
@@ -33,7 +36,7 @@ class BaseNewsletterAdmin(admin.ModelAdmin):
                  (_('Miscellaneous'), {'fields': ('server', 'header_sender', 'header_reply', 'slug'), 'classes': ('collapse',)}),
                  )
     prepopulated_fields = {'slug': ('title',)}
-    actions = ['send_mail_test', 'make_ready_to_send', 'make_cancel_sending', 'send_newsletter']
+    actions = ['send_mail_test', 'make_ready_to_send', 'make_cancel_sending', 'send_newsletter', 'send_newsletter_continuous']
     actions_on_top = False
     actions_on_bottom = True
 
@@ -96,17 +99,20 @@ class BaseNewsletterAdmin(admin.ModelAdmin):
 
     def send_newsletter(self, request, queryset):
         """Send newsletter in queue"""
-        for newsletter in Newsletter.objects.exclude(
-            status=Newsletter.DRAFT).exclude(status=Newsletter.SENT):
-            mailer = Mailer(newsletter)
-            if mailer.can_send:
-                try:
-                    mailer.run()
-                except HTMLParseError:
-                    self.message_user(request, _('Unable to send newsletter, due to errors within HTML.'))
-                    continue
-                self.message_user(request, _('%s succesfully sent.') % newsletter)
+        newsletters = queryset.filter(Q(status=Newsletter.WAITING) | Q(status=Newsletter.SENDING))
+        # newsletters_copy = copy(newsletters)
+        response = StringIO()
+        call_command('send_newsletter', stdout=response)
+        for newsletter in newsletters:
+            self.message_user(request, _('%s succesfully sent. The server says %s') % (newsletter, response.read()))
     send_newsletter.short_description = _('Send newsletter')
+
+    def send_newsletter_continuous(self, request, queryset):
+        """Send newsletter in queue in continuous mode"""
+        call_command('send_newsletter_continuous')
+        for newsletter in queryset.filter(status=Newsletter.SENDING):
+            self.message_user(request, _('%s succesfully sent.') % newsletter)
+    send_newsletter_continuous.short_description = _('Send newsletter continuous')
 
 class NewsletterAdmin(BaseNewsletterAdmin):
     pass

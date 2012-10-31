@@ -10,6 +10,7 @@ from django.db import IntegrityError
 from django.core.files import File
 from django.utils.encoding import smart_str
 from django.utils.timezone import utc
+from django.contrib.admin.sites import AdminSite
 
 from dry_newsletter.newsletter.mailer import Mailer
 from dry_newsletter.newsletter.models import Contact
@@ -22,7 +23,7 @@ from dry_newsletter.newsletter.utils.tokens import untokenize
 
 
 # TEST ALBERTO
-class MailSendingTestCase(TestCase):
+class DebuggingTestCase(TestCase):
     """Tests for the Newsletter model"""
 
     def setUp(self):
@@ -33,19 +34,40 @@ class MailSendingTestCase(TestCase):
         self.mailing_list_2 = MailingList.objects.create(name='Giornalisti')
         self.mailing_list_1.subscribers.add(self.contact_1)
         self.mailing_list_2.subscribers.add(self.contact_1, self.contact_2)
-        self.newsletter = Newsletter.objects.create(title='Test Newsletter', article_1_text='Test Newsletter article 1 text', slug='newsletter_1', server=self.server)
+        self.newsletter = Newsletter.objects.create(title='TEST NEWSLETTER TITLE', article_1_text='Test Newsletter article 1 text', slug='newsletter_1', server=self.server)
         self.newsletter.mailing_lists.add(self.mailing_list_1, self.mailing_list_2)
         self.newsletter.status = Newsletter.WAITING
         self.newsletter.save()
         self.mailer = Mailer(self.newsletter, verbose=1)
+        self.site = AdminSite()
+
 
     def test_sending_mails(self):
-        for c in self.mailer.expedition_list:
-            print(c.email)
-        self.mailer.run()
-        print(self.mailer.can_send)
+        from django.core.management import call_command
+        from dry_newsletter.newsletter.admin.newsletter import BaseNewsletterAdmin
+        from django.db.models import Q
+        from StringIO import StringIO
+        import copy
+        newsletter_admin = BaseNewsletterAdmin(Newsletter, self.site)
+        request = None
+        queryset = Newsletter.objects.all()
+        newsletters = queryset.filter(Q(status=Newsletter.WAITING) | Q(status=Newsletter.SENDING))
+        # nls = copy.copy(newsletters)
+        print(newsletters)
+        # print(nls)
+        response = StringIO()
+        print(response)
+        call_command('send_newsletter', stdout=response)
+        print('NESWLETTERS:')
+        print(newsletters)
+        print('COPIES:')
+        # print(nls)
+        print(response.read())
+        for newsletter in newsletters:
+            print('NEWSLETTER:')
+            print(newsletter.title)
+        # newsletter_admin.send_newsletter(request, queryset)
 
-        self.assertEqual(self.newsletter.status, Newsletter.SENT)
         #self.assertEqual(len(self.mailer.expedition_list), 3)
         #self.assertIn(self.contact_1, self.mailer.expedition_list)
         #self.assertIn(self.contact_2, self.mailer.expedition_list, 'Anche il secondo contatto e nella lista')
