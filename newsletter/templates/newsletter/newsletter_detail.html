@@ -69,14 +69,14 @@
 					<tr>
 						<td style="text-align:center;padding:40px 0;"><img style="width:250px" src="http://www.iperborea.com/static/website/logo_25_anni.png" editable="true" label="Logo Iperborea"></td>
 					</tr>
+
 					<tr>
 						<td>
 							<div style="margin-left:0px;margin-right:0px;border-top:1px solid #D6E3E9;border-bottom:1px solid #D6E3E9;padding:20px 20px">
-								<img src="{{ MEDIA_URL }}{{ newsletter.article_1_image}}" border="0" style="margin:0px 20px 10px 0px;width:200px;float:left" alt="">
+								{% if newsletter.article_1_image %}<img src="{{ MEDIA_URL }}{{ newsletter.article_1_image}}" border="0" style="margin:0px 20px 10px 0px;width:200px;float:left" alt="">{% endif %}
 								<p>
 									<span style="font-family:Helvetica,Arial,sans-serif;color:#EC4E33;font-size:24px">{{ newsletter.article_1_title }}</span>
-									<br>
-									<span style="color:#598592"><em><span style="font-size:medium">{{ newsletter.article_1_subtitle }}</span></em></span>
+									{% if newsletter.article_1_image %}<br><span style="color:#598592;font-size:medium">{{ newsletter.article_1_subtitle }}</span>{% endif %}
 									<br><br><br>
 									<span>{{ newsletter.article_1_text|safe }}</span>
 									<br>
@@ -85,6 +85,39 @@
 						</td>
 					</tr>
 
+{% if newsletter.article_2_title %}
+					<tr>
+						<td>
+							<div style="margin-left:0px;margin-right:0px;border-top:1px solid #D6E3E9;border-bottom:1px solid #D6E3E9;padding:20px 20px">
+								{% if newsletter.article_2_image %}<img src="{{ MEDIA_URL }}{{ newsletter.article_2_image}}" border="0" style="margin:0px 20px 10px 0px;width:200px;float:left" alt="">{% endif %}
+								<p>
+									<span style="font-family:Helvetica,Arial,sans-serif;color:#EC4E33;font-size:24px">{{ newsletter.article_2_title }}</span>
+									{% if newsletter.article_2_image %}<br><span style="color:#598592;font-size:medium">{{ newsletter.article_2_subtitle }}</span>{% endif %}
+									<br><br><br>
+									<span>{{ newsletter.article_2_text|safe }}</span>
+									<br>
+								</p>
+							</div>
+						</td>
+					</tr>
+{% endif %}
+
+{% if newsletter.article_3_title %}
+					<tr>
+						<td>
+							<div style="margin-left:0px;margin-right:0px;border-top:1px solid #D6E3E9;border-bottom:1px solid #D6E3E9;padding:20px 20px">
+								{% if newsletter.article_3_image %}<img src="{{ MEDIA_URL }}{{ newsletter.article_3_image}}" border="0" style="margin:0px 20px 10px 0px;width:200px;float:left" alt="">{% endif %}
+								<p>
+									<span style="font-family:Helvetica,Arial,sans-serif;color:#EC4E33;font-size:24px">{{ newsletter.article_3_title }}</span>
+									{% if newsletter.article_3_image %}<br><span style="color:#598592;font-size:medium">{{ newsletter.article_3_subtitle }}</span>{% endif %}
+									<br><br><br>
+									<span>{{ newsletter.article_3_text|safe }}</span>
+									<br>
+								</p>
+							</div>
+						</td>
+					</tr>
+{% endif %}
 
 					<tr>
 						<td style="min-height:60px;color:#598592;padding:20px"><img style="margin-right:20px;float:left">
