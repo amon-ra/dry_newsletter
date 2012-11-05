@@ -36,7 +36,7 @@ class BaseNewsletterAdmin(admin.ModelAdmin):
                  (_('Miscellaneous'), {'fields': ('server', 'header_sender', 'header_reply', 'slug'), 'classes': ('collapse',)}),
                  )
     prepopulated_fields = {'slug': ('title',)}
-    actions = ['send_mail_test', 'make_ready_to_send', 'make_cancel_sending', 'send_newsletter', 'send_newsletter_continuous']
+    actions = ['send_mail_test', 'make_ready_to_send', 'make_cancel_sending']
     actions_on_top = False
     actions_on_bottom = True
 
@@ -96,24 +96,6 @@ class BaseNewsletterAdmin(admin.ModelAdmin):
             newsletter.save()
         self.message_user(request, _('%s newletters are cancelled') % queryset.count())
     make_cancel_sending.short_description = _('Cancel the sending')
-
-    def send_newsletter(self, request, queryset):
-        """Send newsletter in queue"""
-        newsletters = queryset.filter(Q(status=Newsletter.WAITING) | Q(status=Newsletter.SENDING))
-        # A copy of newsletters is made for later use in message_user. The original is destroyed in the meantime (By who????)
-        newsletters_copy = copy(newsletters)
-        response = StringIO()
-        call_command('send_newsletter')
-        for newsletter in newsletters_copy:
-            self.message_user(request, _('%s succesfully sent') % newsletter)
-    send_newsletter.short_description = _('Send newsletters')
-
-    def send_newsletter_continuous(self, request, queryset):
-        """Send newsletter in queue in continuous mode"""
-        call_command('send_newsletter_continuous')
-        for newsletter in queryset.filter(Q(status=Newsletter.WAITING) | Q(status=Newsletter.SENDING)):
-            self.message_user(request, _('%s succesfully sent.') % newsletter)
-    send_newsletter_continuous.short_description = _('Send newsletters continuously')
 
 class NewsletterAdmin(BaseNewsletterAdmin):
     pass
