@@ -21,15 +21,15 @@
                            }  
                 
                         a, a:link {
-                           color:#2A5DB0;
+                           color:#1F6377;
                            text-decoration: underline;
                            }       
  
                         body, #body_style {
                            background:#000;
-                           min-height:1000px;
+                           /* min-height:1000px;*/
 
-                           font-family:Arial, Helvetica, sans-serif;
+                           font-family:Georgia, Arial, Helvetica, sans-serif;
                            font-size:12px;
                            } 
                             
@@ -38,9 +38,9 @@
                         span.yshortcuts:active,
                         span.yshortcuts:focus {color:#000; background-color:none; border:none;}
                      
-                        a:visited { color: #3c96e2; text-decoration: none} 
-                        a:focus   { color: #3c96e2; text-decoration: underline}  
-                        a:hover   { color: #3c96e2; text-decoration: underline}  
+                        a:visited { color: #598592; text-decoration: none} 
+                        a:focus   { color: #598592; text-decoration: underline}  
+                        a:hover   { color: #598592; text-decoration: underline}  
  
                         @media only screen and (max-device-width: 480px) {
  
@@ -59,41 +59,25 @@
 		
 		
 		
-		<div style="background-color:#c5d5da;text-align:center;font-size:100%">
+		<div style="background-color:#D6E3E9;text-align:center;font-size:100%">
 			<br>
 			<br>
 			<p>Se non visualizzi correttamente questa email <a href="http://{{ domain }}{% url newsletter_newsletter_online_version slug=newsletter.slug %}" target="_blank">clicca qui</a>.</p>
 			<br>
-			</a>
-			<br>
-			<br>
-			<span class="HOEnZb"><font color="#888888"> </font></span>
 			<table cellspacing="0" cellpadding="0" style="width:619px;margin:0 auto;text-align:left;background-color:white">
 				<tbody>
 					<tr>
-						<td><img style="width:250px" src="http://www.iperborea.com/static/website/logo_25_anni.png" editable="true" label="Logo Iperborea"></td>
-					</tr>
-					<tr>
-						<td style="font-family:Gill Sans,GillSans,Lucida Grande,Lucida Sans Unicode,Verdana,Arial,sans-serif;color:#6e8798;padding:0 20px;vertical-align:bottom">	
-							<p style="font-size:2em;padding-top:60px;padding-bottom:15px">
-								Newsletter {{ newsletter.sending_date|date:"D d M Y" }}
-							</p>
-						</td>
+						<td style="text-align:center;padding:40px 0;"><img style="width:250px" src="http://www.iperborea.com/static/website/logo_25_anni.png" editable="true" label="Logo Iperborea"></td>
 					</tr>
 					<tr>
 						<td>
-							<p>{{ newsletter.content }}</p>			
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<div style="margin-left:1px;border-top:3px solid #d3dfe3;border-bottom:3px solid #d3dfe3;width:574px;padding:10px 20px">
-								<img src="{{ MEDIA_URL }}{{ newsletter.article_1_image}}" border="0" style="margin:15px;float:left" alt="" width="200" height="232">
+							<div style="margin-left:0px;margin-right:0px;border-top:1px solid #D6E3E9;border-bottom:1px solid #D6E3E9;padding:20px 20px">
+								<img src="{{ MEDIA_URL }}{{ newsletter.article_1_image}}" border="0" style="margin:0px 20px 10px 0px;width:200px;float:left" alt="">
 								<p>
-									<span style="color:#cc3300"><em><span style="font-size:x-large">{{ newsletter.article_1_title }}</span></em></span>
+									<span style="font-family:Helvetica,Arial,sans-serif;color:#EC4E33;font-size:24px">{{ newsletter.article_1_title }}</span>
 									<br>
-									<span style="color:#cc3300"><em><span style="font-size:medium">{{ newsletter.article_1_subtitle }}</span></em></span>
-									<br>
+									<span style="color:#598592"><em><span style="font-size:medium">{{ newsletter.article_1_subtitle }}</span></em></span>
+									<br><br><br>
 									<span>{{ newsletter.article_1_text|safe }}</span>
 									<br>
 								</p>
@@ -103,13 +87,13 @@
 
 
 					<tr>
-						<td style="min-height:60px;color:#6e8798;padding:20px"><img style="margin-right:20px;float:left">
-						<div style="float:left;width:430px;font-size:10px">
+						<td style="min-height:60px;color:#598592;padding:20px"><img style="margin-right:20px;float:left">
+						<div style="float:left;font-size:10px;text-align:center;">
 							<p>
-								<b>minimum fax s.r.l. </b>â€¢ p.le di ponte milvio, 28 â€¢ 00135 Roma
-								<br>
-								Se hai ricevuto questa newsletter per errore o se desideri cancellarti dalla nostra mailing list
-								invia una mail con oggetto "CANCELLAMI" a <a href="mailto:web@minimumfax.com?subject=CANCELLAMI" target="_blank">web@minimumfax.com</a>
+								<b>© 2010 Iperborea S.r.l. </b><br>
+								Via Palestro, 20 - 20121 Milano - tel (39) 02 87398098 / (39) 02 87398099 - fax (39) 02 798919<br>
+								P.IVA e C.F. 08968860158 - Capitale Sociale € 46.800 i.v. - REA MI158605<br><br>
+								Se hai ricevuto questa newsletter per errore o se desideri cancellarti dalla nostra mailing list invia una mail con oggetto "CANCELLAMI" a <a href="mailto:info@iperborea.com?subject=CANCELLAMI" target="_blank">info@iperborea.com</a>
 							</p><p></p><p></p>
 						</div></td>
 					</tr>
@@ -118,10 +102,8 @@
 					</tr>
 				</tbody>
 			</table>
-			<div class="yj6qo ajU">
-				<div id=":w7" class="ajR" role="button" tabindex="0" aria-label="Show trimmed content" data-tooltip="Show trimmed content"><img class="ajT" src="images/cleardot.gif">
-				</div>
-			</div><span class="HOEnZb adL"><font color="#888888"> </font></span>
+			<br>
+			<br>
 		</div>
 	</body>
 </html>

@@ -17,8 +17,7 @@ from dry_newsletter.newsletter.utils.excel import ExcelResponse
 
 class MailingListAdmin(admin.ModelAdmin):
     date_hierarchy = 'creation_date'
-    list_display = ('creation_date', 'name', 'description', 'subscribers_count', 'unsubscribers_count',)
-    list_editable = ('name', 'description')
+    list_display = ('creation_date', 'name', 'subscribers_count', 'unsubscribers_count',)
     list_filter = ('creation_date', 'modification_date')
     search_fields = ('name', 'description',)
     filter_horizontal = ['subscribers', 'unsubscribers']

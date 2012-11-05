@@ -100,19 +100,20 @@ class BaseNewsletterAdmin(admin.ModelAdmin):
     def send_newsletter(self, request, queryset):
         """Send newsletter in queue"""
         newsletters = queryset.filter(Q(status=Newsletter.WAITING) | Q(status=Newsletter.SENDING))
-        # newsletters_copy = copy(newsletters)
+        # A copy of newsletters is made for later use in message_user. The original is destroyed in the meantime (By who????)
+        newsletters_copy = copy(newsletters)
         response = StringIO()
-        call_command('send_newsletter', stdout=response)
-        for newsletter in newsletters:
-            self.message_user(request, _('%s succesfully sent. The server says %s') % (newsletter, response.read()))
-    send_newsletter.short_description = _('Send newsletter')
+        call_command('send_newsletter')
+        for newsletter in newsletters_copy:
+            self.message_user(request, _('%s succesfully sent') % newsletter)
+    send_newsletter.short_description = _('Send newsletters')
 
     def send_newsletter_continuous(self, request, queryset):
         """Send newsletter in queue in continuous mode"""
         call_command('send_newsletter_continuous')
-        for newsletter in queryset.filter(status=Newsletter.SENDING):
+        for newsletter in queryset.filter(Q(status=Newsletter.WAITING) | Q(status=Newsletter.SENDING)):
             self.message_user(request, _('%s succesfully sent.') % newsletter)
-    send_newsletter_continuous.short_description = _('Send newsletter continuous')
+    send_newsletter_continuous.short_description = _('Send newsletters continuously')
 
 class NewsletterAdmin(BaseNewsletterAdmin):
     pass

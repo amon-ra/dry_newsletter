@@ -52,20 +52,28 @@ class DebuggingTestCase(TestCase):
         request = None
         queryset = Newsletter.objects.all()
         newsletters = queryset.filter(Q(status=Newsletter.WAITING) | Q(status=Newsletter.SENDING))
-        # nls = copy.copy(newsletters)
+        nls = copy.copy(newsletters)
         print(newsletters)
-        # print(nls)
+        print(nls)
         response = StringIO()
         print(response)
-        call_command('send_newsletter', stdout=response)
+        call_command("send_newsletter", stdout=response)
         print('NESWLETTERS:')
         print(newsletters)
         print('COPIES:')
-        # print(nls)
+        print(nls)
+        print('RESPONSE:')
+        response.seek(0)
         print(response.read())
         for newsletter in newsletters:
             print('NEWSLETTER:')
             print(newsletter.title)
+        
+        
+        #content = StringIO()
+        #call_command("dumpdata", stdout=content)
+        #content.seek(0)
+        #print content.read()
         # newsletter_admin.send_newsletter(request, queryset)
 
         #self.assertEqual(len(self.mailer.expedition_list), 3)
