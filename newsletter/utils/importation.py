@@ -11,7 +11,8 @@ from dry_newsletter.newsletter.models import MailingList
 
 
 COLUMNS = ['email', 'first_name', 'last_name', 'tags']
-csv.register_dialect('edn', delimiter=';')
+csv.register_dialect('semicolon', delimiter=';')
+csv.register_dialect('comma', delimiter=',')
 
 
 def create_contact(contact_dict, workgroups=[]):
@@ -51,10 +52,10 @@ def create_contacts(contact_dicts, importer_name, workgroups=[]):
     return inserted
 
 
-def text_contacts_import(stream, workgroups=[]):
+def text_contacts_import(stream):
     """Import contact from a plaintext file, like CSV"""
     contacts = []
-    contact_reader = csv.reader(stream, dialect='edn')
+    contact_reader = csv.reader(stream, dialect='semicolon')
 
     for contact_row in contact_reader:
         contact = {}
@@ -65,10 +66,41 @@ def text_contacts_import(stream, workgroups=[]):
     return create_contacts(contacts, 'text', workgroups)
 
 
-def import_dispatcher(source, type_, workgroups):
+def import_dispatcher(source, type_):
     """Select importer and import contacts"""
     if type_ == 'text':
-        return text_contacts_import(source, workgroups)
+        return text_contacts_import(source)
     elif type_ == 'excel':
-        return excel_contacts_import(source, workgroups)
+        return excel_contacts_import(source)
     return 0
+
+# Mailing list importing
+
+ML_COLUMNS = ['id', 'name']
+
+def create_mailing_list(ml_dict):
+    """Create a mailing list"""
+    mailing_list, created = MailingList.objects.get_or_create(id=ml_dict['id'], name=ml_dict['name'],)
+    return mailing_list, created
+
+def create_mailing_lists(ml_dicts):
+    """Create all the mailing lists to import"""
+    inserted = 0
+
+    for ml_dict in ml_dicts:
+        mailing_list, created = create_mailing_list(ml_dict)
+        inserted += int(created)
+    return inserted
+
+def import_mailing_lists(stream):
+    """Import contact from a plaintext file, like CSV"""
+    mailing_lists = []
+    ml_reader = csv.reader(stream, dialect='comma')
+
+    for ml_row in ml_reader:
+        ml = {}
+        for i in range(len(ml_row)):
+            ml[ML_COLUMNS[i]] = ml_row[i]
+        mailing_lists.append(ml)
+
+    return create_mailing_lists(mailing_lists)

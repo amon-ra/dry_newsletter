@@ -20,7 +20,7 @@ from dry_newsletter.newsletter.models import Newsletter
 from dry_newsletter.newsletter.models import ContactMailingStatus
 from dry_newsletter.newsletter.utils.tokens import tokenize
 from dry_newsletter.newsletter.utils.tokens import untokenize
-
+from dry_newsletter.newsletter.models import ContactMailingStatus
 
 # TEST ALBERTO
 class DebuggingTestCase(TestCase):
@@ -82,9 +82,14 @@ class DebuggingTestCase(TestCase):
         #print('{}, {}'.format(self.contact_1.email, self.contact_2.email))
 
 
+#class ImportNewsletterTestCase(TestCase):
+    
+#    def setUp(self):
+#        self.source("1; Mailing list numero 1")
+
 # TEST EMENCIA
 
-from dry_newsletter.newsletter.models import ContactMailingStatus
+
 class FakeSMTP(object):
     mails_sent = 0
 
