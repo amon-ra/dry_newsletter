@@ -82,13 +82,47 @@ class DebuggingTestCase(TestCase):
         #print('{}, {}'.format(self.contact_1.email, self.contact_2.email))
 
 
-#class ImportNewsletterTestCase(TestCase):
+class ImportMailupContactsTestCase(TestCase):
+
+    def setUp(self):
+        self.source = "albertojacini@hotmail.com;Alberto;Jacini;4,5,12\r\nrobertosacini@hotmail.com;Roberto;Sacini;12\r\nlambertomancini@gmail.com;Lamberto;Mancini;12"
+        self.mailinglist_1 = MailingList.objects.create(id=4, name='Test mailing list 4')
+        self.mailinglist_2 = MailingList.objects.create(id=5, name='Test mailing list 5')
+        self.mailinglist_3 = MailingList.objects.create(id=12, name='Test mailing list 12')
+        from dry_newsletter.newsletter.utils.importation import mailup_create_contact, mailup_create_contacts, import_dispatcher
+        MAILUP_CONTACTS_COLUMNS = ['email', 'first_name', 'last_name', 'mailing_lists']
+
+        import csv
+        csv.register_dialect('semicolon', delimiter=';')
+        contacts = []
+        contact_reader = csv.reader(self.source, dialect='semicolon')
+
+        for contact_row in contact_reader:
+            contact = {}
+            for i in range(len(contact_row)):
+                contact[MAILUP_CONTACTS_COLUMNS[i]] = contact_row[i]
+            
+            if len(contact_row) == 4 :
+                contact[MAILUP_CONTACTS_COLUMNS[3]] = [ int(i) for i in contact_row[3].split(',') ]
     
-#    def setUp(self):
-#        self.source("1; Mailing list numero 1")
+            contacts.append(contact)
+            print(contacts)
+            # mailup_create_contacts(contacts, 'Mailup text')
+
+
+
+
+
+        mailup_create_contact(self.source, 'text_mailup_format')
+
+
+        import_dispatcher(self.source, 'text_mailup_format')
+        self.contacts = Contact.objects.all()
+
+    def test_contact_import(self):
+        self.assertIn(self.contacts.get(id=4), self.mailinglist_1.subscribers)
 
 # TEST EMENCIA
-
 
 class FakeSMTP(object):
     mails_sent = 0

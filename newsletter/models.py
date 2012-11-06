@@ -90,8 +90,6 @@ class SMTPServer(models.Model):
         verbose_name_plural = _('SMTP servers')
 
 
-
-
 class Contact(models.Model):
     """Contact for emailing"""
     email = models.EmailField(_('email'), unique=True)

@@ -62,5 +62,28 @@
     </div>
   </form>
 
+  <form action="." method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div>
+      <fieldset class="module aligned">
+        <h2>{% trans "Text in mailup.com's format" %}</h2>
+        <div class="form-row source">
+          <div>
+            <label for="id_source" class="required">{% trans "Text file (.txt, .csv)" %} :</label>
+            <input name="type" value="text_mailup_format" type="hidden" />
+            <input name="source" id="id_source" type="file" class="vTextField" />
+          </div>
+          <p class="help">{% trans "MAILUP FORMAT: Import contacts from a text file, or a CSV file in the mailup.com format." %}<br />
+            {% trans "Columns are [email][last name][first name][LIST OF MAILING LISTS SPLITTED BY COMMA]." %}<br />
+            {% trans "Only the email column is required." %}
+          </p>
+        </div>
+      </fieldset>
+      <div class="submit-row">
+        <input type="submit" class="default" value="{% trans "Import" %}" />
+      </div>
+    </div>
+  </form>
+
 </div>
 {% endblock %}

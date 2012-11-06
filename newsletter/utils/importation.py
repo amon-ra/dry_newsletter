@@ -10,12 +10,11 @@ from dry_newsletter.newsletter.models import Contact
 from dry_newsletter.newsletter.models import MailingList
 
 
-COLUMNS = ['email', 'first_name', 'last_name', 'tags']
+COLUMNS = ['email', 'first_name', 'last_name']
 csv.register_dialect('semicolon', delimiter=';')
-csv.register_dialect('comma', delimiter=',')
 
 
-def create_contact(contact_dict, workgroups=[]):
+def create_contact(contact_dict):
     """Create a contact and validate the mail"""
     contact_dict['email'] = contact_dict['email'].strip()
     try:
@@ -31,7 +30,7 @@ def create_contact(contact_dict, workgroups=[]):
     return contact, created
 
 
-def create_contacts(contact_dicts, importer_name, workgroups=[]):
+def create_contacts(contact_dicts, importer_name):
     """Create all the contacts to import and
     associated them in a mailing list"""
     inserted = 0
@@ -41,16 +40,12 @@ def create_contacts(contact_dicts, importer_name, workgroups=[]):
         description=_('Contacts imported by %s.') % importer_name)
     mailing_list.save()
 
-    for workgroup in workgroups:
-        workgroup.mailinglists.add(mailing_list)
-
     for contact_dict in contact_dicts:
-        contact, created = create_contact(contact_dict, workgroups)
+        contact, created = create_contact(contact_dict)
         mailing_list.subscribers.add(contact)
         inserted += int(created)
 
     return inserted
-
 
 def text_contacts_import(stream):
     """Import contact from a plaintext file, like CSV"""
@@ -63,20 +58,19 @@ def text_contacts_import(stream):
             contact[COLUMNS[i]] = contact_row[i]
         contacts.append(contact)
 
-    return create_contacts(contacts, 'text', workgroups)
-
+    return create_contacts(contacts, 'text')
 
 def import_dispatcher(source, type_):
     """Select importer and import contacts"""
     if type_ == 'text':
         return text_contacts_import(source)
-    elif type_ == 'excel':
-        return excel_contacts_import(source)
+    elif type_ == 'text_mailup_format':
+        return mailup_contacts_import(source)
     return 0
 
 # Mailing list importing
 
-ML_COLUMNS = ['id', 'name']
+MAILING_LIST_COLUMNS = ['id', 'name']
 
 def create_mailing_list(ml_dict):
     """Create a mailing list"""
@@ -100,7 +94,61 @@ def import_mailing_lists(stream):
     for ml_row in ml_reader:
         ml = {}
         for i in range(len(ml_row)):
-            ml[ML_COLUMNS[i]] = ml_row[i]
+            ml[MAILING_LIST_COLUMNS[i]] = ml_row[i]
         mailing_lists.append(ml)
 
     return create_mailing_lists(mailing_lists)
+
+# Contacts importing from mailup.com
+
+MAILUP_CONTACTS_COLUMNS = ['email', 'first_name', 'last_name', 'mailing_lists']
+
+def mailup_create_contact(contact_dict):
+    """Create a contact and validate the mail"""
+    if 'mailing_lists' in contact_dict:
+        mailing_lists = contact_dict['mailing_lists'].pop()
+    contact_dict['email'] = contact_dict['email'].strip()
+    try:
+        validate_email(contact_dict['email'])
+        contact_dict['valid'] = True
+    except ValidationError:
+        contact_dict['valid'] = False
+
+    contact, created = Contact.objects.get_or_create(email=contact_dict['email'])
+
+    try:
+        for ml in mailing_lists:
+            mailing_list = MailingList.objects.get(id=ml)
+            mailing_list.subscribers.add(contact)
+    except:
+        pass
+
+    return contact, created
+
+def mailup_create_contacts(contact_dicts, importer_name):
+    """Create all the contacts to import and
+    associated them in a mailing list"""
+    inserted = 0
+
+    for contact_dict in contact_dicts:
+        contact, created = mailup_create_contact(contact_dict)
+        inserted += int(created)
+
+    return inserted
+
+def mailup_contacts_import(stream):
+    """Import contact from a plaintext file, in the mailup format: 'email@email.com; First_name; Last_name;1,5,8'. Where 1,5,8 are the ids of the mailing lists to which the contact subscribes"""
+    contacts = []
+    contact_reader = csv.reader(stream, dialect='semicolon')
+
+    for contact_row in contact_reader:
+        contact = {}
+        for i in range(len(contact_row)):
+            contact[MAILUP_CONTACTS_COLUMNS[i]] = contact_row[i]
+        
+        if len(contact_row) == 4 :
+            contact[MAILUP_CONTACTS_COLUMNS[3]] = [ int(i) for i in contact_row[3].split(',') ]
+
+        contacts.append(contact)
+
+    return mailup_create_contacts(contacts, 'Mailup text')
