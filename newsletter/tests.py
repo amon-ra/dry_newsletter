@@ -85,12 +85,45 @@ class DebuggingTestCase(TestCase):
 class ImportMailupContactsTestCase(TestCase):
 
     def setUp(self):
-        self.source = "albertojacini@hotmail.com;Alberto;Jacini;4,5,12\r\nrobertosacini@hotmail.com;Roberto;Sacini;12\r\nlambertomancini@gmail.com;Lamberto;Mancini;12"
-        self.mailinglist_1 = MailingList.objects.create(id=4, name='Test mailing list 4')
-        self.mailinglist_2 = MailingList.objects.create(id=5, name='Test mailing list 5')
-        self.mailinglist_3 = MailingList.objects.create(id=12, name='Test mailing list 12')
-        from dry_newsletter.newsletter.utils.importation import mailup_create_contact, mailup_create_contacts, import_dispatcher
+        self.source = open('dry_newsletter/newsletter/test_files/test_csv_file.csv', 'r')
+        self.mailinglist_69 = MailingList.objects.create(id=69, name='Test mailing list 69')
+        self.mailinglist_71 = MailingList.objects.create(id=71, name='Test mailing list 71')
+        self.mailinglist_72 = MailingList.objects.create(id=72, name='Test mailing list 72')
+        # from dry_newsletter.newsletter.utils.importation import mailup_create_contact, mailup_create_contacts, import_dispatcher
         MAILUP_CONTACTS_COLUMNS = ['email', 'first_name', 'last_name', 'mailing_lists']
+        from django.core.exceptions import ValidationError
+        from django.core.validators import validate_email
+
+        def mailup_create_contact(contact_dict):
+            """Create a contact and validate the mail"""
+            print('ENTRA IL CANDIDATO %s' % contact_dict['email'])
+            #for k in contact_dict.keys():
+            #    print k
+            if 'mailing_lists' in contact_dict:
+                print('SIIIIIIIIIIIII')
+                mailing_lists = contact_dict.pop('mailing_lists')
+                for k in contact_dict.keys():
+                    print k
+            contact_dict['email'] = contact_dict['email'].strip()
+            try:
+                validate_email(contact_dict['email'])
+                contact_dict['valid'] = True
+            except ValidationError:
+                contact_dict['valid'] = False
+        
+            contact, created = Contact.objects.get_or_create(email=contact_dict['email'], first_name=contact_dict['first_name'], last_name=contact_dict['last_name'])
+        
+            try:
+                for ml in mailing_lists:
+                    mailing_list = MailingList.objects.get(id=ml)
+                    mailing_list.subscribers.add(contact)
+            except:
+                pass
+        
+            return contact, created
+
+
+# mailup_contacts_import()
 
         import csv
         csv.register_dialect('semicolon', delimiter=';')
@@ -106,21 +139,35 @@ class ImportMailupContactsTestCase(TestCase):
                 contact[MAILUP_CONTACTS_COLUMNS[3]] = [ int(i) for i in contact_row[3].split(',') ]
     
             contacts.append(contact)
-            print(contacts)
-            # mailup_create_contacts(contacts, 'Mailup text')
+        print('CONTACTS:')
+        print(contacts)
+        
+        
+        contact_dicts = contacts
+        # mailup_create_contacts(contacts)
 
+# mailup_create_contacts
 
-
-
-
-        mailup_create_contact(self.source, 'text_mailup_format')
-
-
-        import_dispatcher(self.source, 'text_mailup_format')
-        self.contacts = Contact.objects.all()
+        inserted = 0
+    
+        for contact_dict in contact_dicts:
+            contact, created = mailup_create_contact(contact_dict)
+            print contact
+            inserted += int(created)
+        print('INSERTED:')
+        print(inserted)
+        
+        self.db_contacts = Contact.objects.all()
+        print('DB_CONTACTS:')
+        print(self.db_contacts)
+        fabrizio = self.db_contacts.get(last_name='Piazza')
+        print('FABRIZIO:')
+        print(fabrizio.email)
+        print(fabrizio.last_name)
+        print(fabrizio.first_name)
 
     def test_contact_import(self):
-        self.assertIn(self.contacts.get(id=4), self.mailinglist_1.subscribers)
+        self.assertIn(self.db_contacts.get(last_name='Piazza'), self.mailinglist_71.subscribers.all())
 
 # TEST EMENCIA
 

@@ -106,7 +106,7 @@ MAILUP_CONTACTS_COLUMNS = ['email', 'first_name', 'last_name', 'mailing_lists']
 def mailup_create_contact(contact_dict):
     """Create a contact and validate the mail"""
     if 'mailing_lists' in contact_dict:
-        mailing_lists = contact_dict['mailing_lists'].pop()
+        mailing_lists = contact_dict.pop('mailing_lists')
     contact_dict['email'] = contact_dict['email'].strip()
     try:
         validate_email(contact_dict['email'])
@@ -114,7 +114,7 @@ def mailup_create_contact(contact_dict):
     except ValidationError:
         contact_dict['valid'] = False
 
-    contact, created = Contact.objects.get_or_create(email=contact_dict['email'])
+    contact, created = Contact.objects.get_or_create(email=contact_dict['email'], first_name=contact_dict['first_name'], last_name=contact_dict['last_name'])
 
     try:
         for ml in mailing_lists:
@@ -125,7 +125,7 @@ def mailup_create_contact(contact_dict):
 
     return contact, created
 
-def mailup_create_contacts(contact_dicts, importer_name):
+def mailup_create_contacts(contact_dicts):
     """Create all the contacts to import and
     associated them in a mailing list"""
     inserted = 0
@@ -151,4 +151,4 @@ def mailup_contacts_import(stream):
 
         contacts.append(contact)
 
-    return mailup_create_contacts(contacts, 'Mailup text')
+    return mailup_create_contacts(contacts)
