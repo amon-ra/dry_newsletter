@@ -148,7 +148,8 @@ def mailup_contacts_import(stream):
         
         if len(contact_row) == 4 :
             contact[MAILUP_CONTACTS_COLUMNS[3]] = [ int(i) for i in contact_row[3].split(',') ]
-        else contact[MAILUP_CONTACTS_COLUMNS[3]] = [2] # Mailing list con id 2, lista default per contatti non appartenenti ad altre mailing lists
+        else:
+            contact[MAILUP_CONTACTS_COLUMNS[3]] = [2] # Mailing list con id 2, lista default per contatti non appartenenti ad altre mailing lists
 
         contacts.append(contact)
 
