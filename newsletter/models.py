@@ -206,18 +206,18 @@ class Newsletter(models.Model):
 
     article_1_title = models.CharField(_('Article 1 - Title'), max_length=255, blank=True)
     article_1_subtitle = models.CharField(_('Article 1 - Subtitle'), max_length=255, blank=True)
-    article_1_text = models.TextField(_('Article 1 - Text'), help_text=_(use_html_to_text_converter), default=_('<body>\n<!-- Edit your newsletter here -->\n</body>'), blank=True)
+    article_1_text = models.TextField(_('Article 1 - Text'), help_text=_(use_html_to_text_converter), default=_('Edit here the body of your article'), blank=True)
     # DA RISOLVERE Alberto: se carico immagine con spazio nel nome, nella mail lo spazio viene escaped con + e quindi non scarica immagine
     article_1_image = models.ImageField(_('Article 1 - Image'), upload_to=upload_to, help_text=help_text_image, blank=True)
 
     article_2_title = models.CharField(_('Article 2 - Title'), max_length=255, blank=True)
     article_2_subtitle = models.CharField(_('Article 2 - Subtitle'), max_length=255, blank=True)
-    article_2_text = models.TextField(_('Article 2 - Text'), help_text=_(use_html_to_text_converter), default=_('<body>\n<!-- Edit your newsletter here -->\n</body>'), blank=True)
+    article_2_text = models.TextField(_('Article 2 - Text'), help_text=_(use_html_to_text_converter), blank=True)
     article_2_image = models.ImageField(_('Article 2 - Image'), upload_to=upload_to, help_text=help_text_image, blank=True)
        
     article_3_title = models.CharField(_('Article 3 - Title'), max_length=255, blank=True)
     article_3_subtitle = models.CharField(_('Article 3 - Subtitle'), max_length=255, blank=True)
-    article_3_text = models.TextField(_('Article 3 - Text'), help_text=_(use_html_to_text_converter), default=_('<body>\n<!-- Edit your newsletter here -->\n</body>'), blank=True)
+    article_3_text = models.TextField(_('Article 3 - Text'), help_text=_(use_html_to_text_converter), blank=True)
     article_3_image = models.ImageField(_('Article 3 - Image'), upload_to=upload_to, help_text=help_text_image, blank=True)
 
     mailing_lists = models.ManyToManyField(MailingList, verbose_name=_('mailing list'), related_name=('newsletters'),)
